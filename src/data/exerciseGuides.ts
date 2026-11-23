@@ -288,6 +288,25 @@ export const EXERCISE_GUIDES: Record<string, ExerciseGuide> = {
     phaseLabels: { start: 'Alcance Frontal', end: 'Retração Escapular' },
     referenceNote: DEFAULT_REF_NOTE,
   },
+  'ex-remada-convergente-unilateral': {
+    exerciseId: 'ex-remada-convergente-unilateral',
+    primaryMuscles: ['lats', 'traps-mid'],
+    secondaryMuscles: ['deltoid-rear', 'biceps', 'forearms', 'rotator-cuff'],
+    executionSteps: [
+      'Ajuste o assento e apoie firmemente o peito no estofado frontal, segurando o pegador inativo com a mão livre para estabilizar o tronco.',
+      'Segure a alavanca do lado de trabalho com pegada neutra e braço estendido à frente sem soltar o ombro.',
+      'Puxe a alavanca em arco convergente levando o cotovelo junto às costelas e retraindo a escápula.',
+      'Retorne devagar controlando o peso até o alongamento completo, finalize as repetições e troque de lado.',
+    ],
+    breathing: 'Expire ao puxar o cotovelo para trás; inspire no retorno controlado.',
+    postureCues: [
+      'Mantenha o peito colado ao apoio e evite rodar o tronco ou a lombar para puxar mais carga.',
+      'Conduza o movimento pelo cotovelo com o ombro abaixado (longe da orelha).',
+    ],
+    movementType: 'dynamic',
+    phaseLabels: { start: 'Alongamento Unilateral', end: 'Puxada Convergente' },
+    referenceNote: DEFAULT_REF_NOTE,
+  },
   'ex-remada-baixa': {
     exerciseId: 'ex-remada-baixa',
     primaryMuscles: ['lats', 'traps-mid'],
@@ -554,6 +573,25 @@ export const EXERCISE_GUIDES: Record<string, ExerciseGuide> = {
     phaseLabels: { start: 'Cotovelos a 90°', end: 'Extensão Completa' },
     referenceNote: DEFAULT_REF_NOTE,
   },
+  'ex-triceps-testa-halter': {
+    exerciseId: 'ex-triceps-testa-halter',
+    primaryMuscles: ['triceps'],
+    secondaryMuscles: ['forearms'],
+    executionSteps: [
+      'Deite-se no banco reto com pés firmes no chão, lombar neutra e um halter em cada mão em pegada neutra (palmas voltadas uma para a outra).',
+      'Eleve os braços acima do peito e incline-os levemente para trás (~10°) mantendo os cotovelos estáveis.',
+      'Flexione apenas os cotovelos descendo os halteres devagar ao lado das têmporas/testa.',
+      'Estenda os cotovelos de volta ao topo contraindo o tríceps sem abrir os braços para fora.',
+    ],
+    breathing: 'Inspire ao descer os halteres ao lado da cabeça; expire ao estender para cima.',
+    postureCues: [
+      'Manter a pegada neutra com halteres reduz a tensão nos punhos e cotovelos em comparação à barra reta.',
+      'Apoie costas e pés firmemente no banco/solo para garantir estabilidade total da lombar.',
+    ],
+    movementType: 'dynamic',
+    phaseLabels: { start: 'Flexão ao Lado da Cabeça', end: 'Extensão Vertical' },
+    referenceNote: DEFAULT_REF_NOTE,
+  },
   'ex-triceps-frances-halter': {
     exerciseId: 'ex-triceps-frances-halter',
     primaryMuscles: ['triceps'],
@@ -686,6 +724,25 @@ export const EXERCISE_GUIDES: Record<string, ExerciseGuide> = {
     ],
     movementType: 'dynamic',
     phaseLabels: { start: 'Quadril Baixo', end: 'Extensão de Quadril' },
+    referenceNote: DEFAULT_REF_NOTE,
+  },
+  'ex-cadeira-adutora': {
+    exerciseId: 'ex-cadeira-adutora',
+    primaryMuscles: ['adductors'],
+    secondaryMuscles: ['glutes'],
+    executionSteps: [
+      'Ajuste a abertura inicial da máquina para um alongamento confortável sem forçar a região da virilha.',
+      'Sente-se com lombar e costas totalmente apoiadas no encosto e segure as alças laterais.',
+      'Feche as pernas de forma contínua pressionando a face interna das coxas contra as almofadas.',
+      'Pause por 1 segundo na contração máxima e retorne devagar resistindo à abertura.',
+    ],
+    breathing: 'Expire ao fechar as pernas; inspire ao controlar a abertura.',
+    postureCues: [
+      'Mantenha a coluna neutra contra o encosto sem curvar o tronco à frente para fazer força.',
+      'Controle o retorno na abertura para evitar trancos nos tendões adutores.',
+    ],
+    movementType: 'dynamic',
+    phaseLabels: { start: 'Abertura Controlada', end: 'Adução Medial' },
     referenceNote: DEFAULT_REF_NOTE,
   },
   'ex-cadeira-abdutora': {

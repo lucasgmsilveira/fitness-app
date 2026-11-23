@@ -8,6 +8,7 @@ import {
   INITIAL_EXERCISES,
   INITIAL_FOODS,
   SEED_TIMESTAMP_V1,
+  SEED_TIMESTAMP_V4,
 } from '../src/db/seed';
 import {
   exportBackup,
@@ -104,6 +105,31 @@ describe('Seed A/B/C/D, exportação e restauração JSON no IndexedDB', () => {
     await applyStarterRoutinesABCD(testDb);
     expect(await testDb.routines.count()).toBe(4);
     expect(await testDb.workoutSessions.count()).toBe(1);
+  });
+
+  it('atualiza rotinas padrão v3 intocadas para Superiores/Inferiores v4 e adiciona novos exercícios', async () => {
+    await testDb.appMeta.put({ key: 'seeded', value: 'true' });
+    await testDb.appMeta.put({ key: 'seedVersion', value: '3' });
+    await testDb.routines.bulkPut([
+      { id: 'rt-treino-a', name: 'Treino A — Peito e Tríceps', order: 0, updatedAt: SEED_TIMESTAMP_V1, exercises: [] },
+      { id: 'rt-treino-b', name: 'Treino B — Costas e Bíceps', order: 1, updatedAt: SEED_TIMESTAMP_V1, exercises: [] },
+      { id: 'rt-treino-c', name: 'Treino C — Pernas e Core', order: 2, updatedAt: SEED_TIMESTAMP_V1, exercises: [] },
+      { id: 'rt-treino-d', name: 'Treino D — Ombros, Trapézio e Core', order: 3, updatedAt: SEED_TIMESTAMP_V1, exercises: [] },
+    ]);
+
+    await ensureInitialSeed(testDb);
+
+    const upgraded = await testDb.routines.orderBy('order').toArray();
+    expect(upgraded.map((r) => r.name)).toEqual([
+      'Treino A — Superiores 1',
+      'Treino B — Inferiores 1 + Braços',
+      'Treino C — Superiores 2',
+      'Treino D — Inferiores 2 + Braços',
+    ]);
+    expect(upgraded.every((r) => r.updatedAt === SEED_TIMESTAMP_V4)).toBe(true);
+    expect(await testDb.exercises.get('ex-remada-convergente-unilateral')).toBeDefined();
+    expect(await testDb.exercises.get('ex-triceps-testa-halter')).toBeDefined();
+    expect(await testDb.exercises.get('ex-cadeira-adutora')).toBeDefined();
   });
 
   it('atualiza catálogo de alimentos v2 para v3 preservando itens customizados e editados pelo usuário', async () => {

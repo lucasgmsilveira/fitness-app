@@ -177,7 +177,7 @@ export function WorkoutsPage({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-xs text-[#9CA3AF]">
-              Monte suas fichas A/B/C/D e edite a qualquer momento
+              Alterne Superiores 1 / Inferiores 1 / Superiores 2 / Inferiores 2 ou edite livremente
             </p>
             <button
               type="button"

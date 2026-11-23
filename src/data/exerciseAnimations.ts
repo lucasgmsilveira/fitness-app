@@ -57,6 +57,7 @@ export type ApparatusPreset =
   | 'lying-leg-curl'
   | 'hip-thrust-bench'
   | 'hip-abductor'
+  | 'hip-adductor'
   | 'seated-calf'
   | 'standing-calf';
 
@@ -82,6 +83,7 @@ export type ActiveBodyRegion =
   | 'lower-back'
   | 'glutes'
   | 'quads'
+  | 'adductors'
   | 'hamstrings'
   | 'calves'
   | 'forearms'
@@ -859,6 +861,45 @@ export const EXERCISE_ANIMATIONS: Record<string, ExerciseAnimationSpec> = {
     motionArrows: ['M 240 88 H 178'],
   },
 
+  'ex-remada-convergente-unilateral': {
+    exerciseId: 'ex-remada-convergente-unilateral',
+    view: 'side',
+    apparatus: 'chest-supported-row',
+    load: 'none',
+    activeHighlights: ['lats', 'upper-back', 'biceps', 'shoulders'],
+    start: {
+      head: { x: 194, y: 74 },
+      neck: { x: 184, y: 88 },
+      shoulder: { x: 176, y: 98 },
+      hip: { x: 148, y: 142 },
+      farElbow: { x: 214, y: 104 },
+      farHand: { x: 248, y: 102 },
+      nearElbow: { x: 210, y: 108 },
+      nearHand: { x: 244, y: 106 },
+      farKnee: { x: 186, y: 152 },
+      farFoot: { x: 188, y: 188 },
+      nearKnee: { x: 182, y: 156 },
+      nearFoot: { x: 184, y: 189 },
+      faceDir: 1,
+    },
+    end: {
+      head: { x: 194, y: 74 },
+      neck: { x: 184, y: 88 },
+      shoulder: { x: 176, y: 98 },
+      hip: { x: 148, y: 142 },
+      farElbow: { x: 214, y: 104 },
+      farHand: { x: 248, y: 102 },
+      nearElbow: { x: 136, y: 118 },
+      nearHand: { x: 176, y: 112 },
+      farKnee: { x: 186, y: 152 },
+      farFoot: { x: 188, y: 188 },
+      nearKnee: { x: 182, y: 156 },
+      nearFoot: { x: 184, y: 189 },
+      faceDir: 1,
+    },
+    motionArrows: ['M 240 88 Q 210 92 176 96'],
+  },
+
   'ex-remada-baixa': {
     exerciseId: 'ex-remada-baixa',
     view: 'side',
@@ -1548,6 +1589,60 @@ export const EXERCISE_ANIMATIONS: Record<string, ExerciseAnimationSpec> = {
     motionArrows: ['M 186 94 Q 186 122 164 136'],
   },
 
+  'ex-triceps-testa-halter': {
+    exerciseId: 'ex-triceps-testa-halter',
+    view: 'side',
+    apparatus: 'flat-bench',
+    load: 'dumbbells',
+    activeHighlights: ['triceps'],
+    start: {
+      head: { x: 76, y: 128 },
+      neck: { x: 92, y: 134 },
+      shoulder: { x: 108, y: 136 },
+      hip: { x: 180, y: 140 },
+      farElbow: { x: 100, y: 98 },
+      farHand: { x: 66, y: 112 },
+      nearElbow: { x: 106, y: 100 },
+      nearHand: { x: 72, y: 114 },
+      farKnee: { x: 222, y: 142 },
+      farFoot: { x: 230, y: 188 },
+      nearKnee: { x: 226, y: 145 },
+      nearFoot: { x: 234, y: 189 },
+      faceDir: 1,
+    },
+    mid: {
+      head: { x: 76, y: 128 },
+      neck: { x: 92, y: 134 },
+      shoulder: { x: 108, y: 136 },
+      hip: { x: 180, y: 140 },
+      farElbow: { x: 100, y: 98 },
+      farHand: { x: 74, y: 74 },
+      nearElbow: { x: 106, y: 100 },
+      nearHand: { x: 80, y: 76 },
+      farKnee: { x: 222, y: 142 },
+      farFoot: { x: 230, y: 188 },
+      nearKnee: { x: 226, y: 145 },
+      nearFoot: { x: 234, y: 189 },
+      faceDir: 1,
+    },
+    end: {
+      head: { x: 76, y: 128 },
+      neck: { x: 92, y: 134 },
+      shoulder: { x: 108, y: 136 },
+      hip: { x: 180, y: 140 },
+      farElbow: { x: 100, y: 98 },
+      farHand: { x: 104, y: 62 },
+      nearElbow: { x: 106, y: 100 },
+      nearHand: { x: 110, y: 64 },
+      farKnee: { x: 222, y: 142 },
+      farFoot: { x: 230, y: 188 },
+      nearKnee: { x: 226, y: 145 },
+      nearFoot: { x: 234, y: 189 },
+      faceDir: 1,
+    },
+    motionArrows: ['M 66 100 Q 68 68 100 58'],
+  },
+
   'ex-triceps-frances-halter': {
     exerciseId: 'ex-triceps-frances-halter',
     view: 'side',
@@ -1884,6 +1979,47 @@ export const EXERCISE_ANIMATIONS: Record<string, ExerciseAnimationSpec> = {
       faceDir: 1,
     },
     motionArrows: ['M 164 164 L 172 136'],
+  },
+
+  'ex-cadeira-adutora': {
+    exerciseId: 'ex-cadeira-adutora',
+    view: 'front',
+    apparatus: 'hip-adductor',
+    load: 'none',
+    activeHighlights: ['adductors'],
+    start: {
+      head: { x: 160, y: 50 },
+      neck: { x: 160, y: 66 },
+      leftShoulder: { x: 138, y: 74 },
+      rightShoulder: { x: 182, y: 74 },
+      leftHip: { x: 144, y: 126 },
+      rightHip: { x: 176, y: 126 },
+      leftElbow: { x: 124, y: 102 },
+      rightElbow: { x: 196, y: 102 },
+      leftHand: { x: 124, y: 126 },
+      rightHand: { x: 196, y: 126 },
+      leftKnee: { x: 112, y: 152 },
+      rightKnee: { x: 208, y: 152 },
+      leftFoot: { x: 110, y: 186 },
+      rightFoot: { x: 210, y: 186 },
+    },
+    end: {
+      head: { x: 160, y: 50 },
+      neck: { x: 160, y: 66 },
+      leftShoulder: { x: 138, y: 74 },
+      rightShoulder: { x: 182, y: 74 },
+      leftHip: { x: 144, y: 126 },
+      rightHip: { x: 176, y: 126 },
+      leftElbow: { x: 124, y: 102 },
+      rightElbow: { x: 196, y: 102 },
+      leftHand: { x: 124, y: 126 },
+      rightHand: { x: 196, y: 126 },
+      leftKnee: { x: 146, y: 152 },
+      rightKnee: { x: 174, y: 152 },
+      leftFoot: { x: 146, y: 186 },
+      rightFoot: { x: 174, y: 186 },
+    },
+    motionArrows: ['M 106 164 H 138', 'M 214 164 H 182'],
   },
 
   'ex-cadeira-abdutora': {

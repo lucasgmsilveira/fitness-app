@@ -601,6 +601,31 @@ function renderFrontApparatus(
           />
         </g>
       );
+    case 'hip-adductor':
+      return (
+        <g stroke="#394052" strokeWidth="1.4">
+          <rect x="142" y="64" width="36" height="68" rx="6" fill="#252B3B" />
+          <rect x="136" y="130" width="48" height="10" rx="4" fill="#252B3B" />
+          <line x1="160" y1="140" x2="160" y2="190" strokeWidth="4" />
+          {/* Almofadas internas nas coxas */}
+          <rect
+            x={pose.leftKnee.x + 4}
+            y={pose.leftKnee.y - 12}
+            width="7"
+            height="24"
+            rx="3"
+            fill="#475569"
+          />
+          <rect
+            x={pose.rightKnee.x - 11}
+            y={pose.rightKnee.y - 12}
+            width="7"
+            height="24"
+            rx="3"
+            fill="#475569"
+          />
+        </g>
+      );
     default:
       return null;
   }
@@ -980,6 +1005,30 @@ export function ExerciseExecutionScene({
           highlight={activeSet.has('quads')}
           highlightOpacity={highlightOpacity}
         />
+        {activeSet.has('adductors') && (
+          <>
+            <line
+              x1={pose.leftHip.x + 4}
+              y1={pose.leftHip.y + 4}
+              x2={pose.leftKnee.x + 3}
+              y2={pose.leftKnee.y - 4}
+              stroke="#F97316"
+              strokeOpacity={highlightOpacity}
+              strokeWidth="6.5"
+              strokeLinecap="round"
+            />
+            <line
+              x1={pose.rightHip.x - 4}
+              y1={pose.rightHip.y + 4}
+              x2={pose.rightKnee.x - 3}
+              y2={pose.rightKnee.y - 4}
+              stroke="#F97316"
+              strokeOpacity={highlightOpacity}
+              strokeWidth="6.5"
+              strokeLinecap="round"
+            />
+          </>
+        )}
         <Limb a={pose.leftKnee} b={pose.leftFoot} width={9} fill="#3B4054" stroke="#78809A" />
         <Limb a={pose.rightKnee} b={pose.rightFoot} width={9} fill="#3B4054" stroke="#78809A" />
         <circle cx={pose.leftFoot.x} cy={pose.leftFoot.y} r="4.2" fill="#4B526B" />

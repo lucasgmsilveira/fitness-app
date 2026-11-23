@@ -71,7 +71,13 @@ function validateFrontPose(pose: FrontPose, prefix: string) {
 
 describe('Guias visuais de músculos e execução de exercícios (100% offline)', () => {
   it('cobre 100% dos exercícios do catálogo inicial com guias e animações válidas', () => {
-    expect(INITIAL_EXERCISES.length).toBeGreaterThanOrEqual(38);
+    expect(INITIAL_EXERCISES.length).toBeGreaterThanOrEqual(41);
+    expect(EXERCISE_GUIDES['ex-remada-convergente-unilateral']).toBeDefined();
+    expect(EXERCISE_GUIDES['ex-triceps-testa-halter']).toBeDefined();
+    expect(EXERCISE_GUIDES['ex-cadeira-adutora']).toBeDefined();
+    expect(EXERCISE_ANIMATIONS['ex-remada-convergente-unilateral']).toBeDefined();
+    expect(EXERCISE_ANIMATIONS['ex-triceps-testa-halter']).toBeDefined();
+    expect(EXERCISE_ANIMATIONS['ex-cadeira-adutora']).toBeDefined();
 
     const svgMappedMuscles = new Set([
       ...FRONT_MUSCLE_PATHS.map((g) => g.id),

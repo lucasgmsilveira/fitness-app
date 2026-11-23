@@ -114,7 +114,7 @@ export function SettingsPage({
           className="w-full py-2.5 px-3 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-xs font-semibold text-[#84CC16] hover:border-[#84CC16]/50 inline-flex items-center justify-center gap-2"
         >
           <Dumbbell className="w-4 h-4" />
-          Carregar rotinas A/B/C/D (mantém histórico)
+          Carregar rotinas Superiores/Inferiores (mantém histórico)
         </button>
         <button
           type="button"
@@ -150,8 +150,8 @@ export function SettingsPage({
         onClose={() => setApplyAbcdOpen(false)}
         onConfirm={handleApplyAbcd}
         variant="primary"
-        title="Carregar rotinas A/B/C/D?"
-        description="As fichas modelo A, B, C e D serão carregadas substituindo as rotinas atuais. Todo o seu histórico de treinos, refeições e check-ins será preservado."
+        title="Carregar rotinas Superiores/Inferiores?"
+        description="As fichas modelo A (Superiores 1), B (Inferiores 1 + Braços), C (Superiores 2) e D (Inferiores 2 + Braços) serão carregadas substituindo as rotinas atuais. Todo o seu histórico de treinos, refeições e check-ins será preservado."
         confirmLabel="Carregar Rotinas"
       />
 
