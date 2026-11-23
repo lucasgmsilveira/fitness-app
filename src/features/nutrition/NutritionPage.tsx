@@ -150,7 +150,7 @@ export function NutritionPage({
                 {formatDateBr(selectedDate, todayStr)}
               </p>
               {selectedDate !== todayStr && (
-                <p className="text-[10px] text-[#F97316]">Toque para voltar a Hoje</p>
+                <p className="text-[0.75rem] text-[#F97316]">Toque para voltar a Hoje</p>
               )}
             </button>
 
@@ -185,21 +185,21 @@ export function NutritionPage({
 
             <div className="grid grid-cols-3 gap-2">
               <div className="rounded-xl bg-[#1E1E24] p-2.5">
-                <p className="text-[11px] text-red-400 font-medium">Proteína</p>
+                <p className="text-[0.8125rem] text-red-400 font-medium">Proteína</p>
                 <p className="text-xs font-bold tabular-nums mt-0.5">
                   {totals.protein}g{' '}
                   <span className="text-[#9CA3AF] font-normal">/ {goal.protein}g</span>
                 </p>
               </div>
               <div className="rounded-xl bg-[#1E1E24] p-2.5">
-                <p className="text-[11px] text-yellow-400 font-medium">Gordura</p>
+                <p className="text-[0.8125rem] text-yellow-400 font-medium">Gordura</p>
                 <p className="text-xs font-bold tabular-nums mt-0.5">
                   {totals.fat}g{' '}
                   <span className="text-[#9CA3AF] font-normal">/ {goal.fat}g</span>
                 </p>
               </div>
               <div className="rounded-xl bg-[#1E1E24] p-2.5">
-                <p className="text-[11px] text-sky-400 font-medium">Carboidrato</p>
+                <p className="text-[0.8125rem] text-sky-400 font-medium">Carboidrato</p>
                 <p className="text-xs font-bold tabular-nums mt-0.5">
                   {totals.carbs}g{' '}
                   <span className="text-[#9CA3AF] font-normal">/ {goal.carbs}g</span>
@@ -218,21 +218,21 @@ export function NutritionPage({
                 <button
                   type="button"
                   onClick={() => void addWater(-250)}
-                  className="px-2 py-1 rounded-lg bg-[#1E1E24] text-[11px] text-[#9CA3AF] hover:text-white"
+                  className="px-2 py-1 rounded-lg bg-[#1E1E24] text-[0.8125rem] text-[#9CA3AF] hover:text-white"
                 >
                   -250
                 </button>
                 <button
                   type="button"
                   onClick={() => void addWater(250)}
-                  className="px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-[11px] font-semibold text-sky-300"
+                  className="px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-[0.8125rem] font-semibold text-sky-300"
                 >
                   +250 ml
                 </button>
                 <button
                   type="button"
                   onClick={() => void addWater(500)}
-                  className="px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-[11px] font-semibold text-sky-300"
+                  className="px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-[0.8125rem] font-semibold text-sky-300"
                 >
                   +500 ml
                 </button>
@@ -263,7 +263,7 @@ export function NutritionPage({
                     <h3 className="text-sm font-bold text-[#F4F4F6]">
                       {MEAL_LABELS[mealType]}
                     </h3>
-                    <p className="text-[11px] text-[#9CA3AF] tabular-nums">
+                    <p className="text-[0.8125rem] text-[#9CA3AF] tabular-nums">
                       {mealTotals.calories} kcal · {mealTotals.protein}g P ·{' '}
                       {mealTotals.carbs}g C · {mealTotals.fat}g G
                     </p>
@@ -292,7 +292,7 @@ export function NutritionPage({
                           <p className="text-xs font-medium text-[#F4F4F6] truncate">
                             {item.foodName}
                           </p>
-                          <p className="text-[11px] text-[#9CA3AF] tabular-nums">
+                          <p className="text-[0.8125rem] text-[#9CA3AF] tabular-nums">
                             {item.unitMode === 'grams'
                               ? `${item.quantity}g`
                               : `${item.quantity}×`}{' '}

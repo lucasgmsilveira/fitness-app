@@ -128,7 +128,7 @@ export function ExerciseCatalogView({ exercises }: ExerciseCatalogViewProps) {
                 {ex.equipment} · Descanso padrão {ex.defaultRestSec}s
               </p>
               {ex.notes && (
-                <p className="text-[11px] text-[#6B7280] mt-1">{ex.notes}</p>
+                <p className="text-[0.8125rem] text-[#6B7280] mt-1">{ex.notes}</p>
               )}
             </div>
             <div className="flex items-center gap-1 shrink-0">

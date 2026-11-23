@@ -171,7 +171,7 @@ export function RoutineEditorModal({
                           <p className="text-sm font-medium text-[#F4F4F6] truncate">
                             {idx + 1}. {ex?.name ?? 'Exercício removido'}
                           </p>
-                          <p className="text-[11px] text-[#9CA3AF]">
+                          <p className="text-[0.8125rem] text-[#9CA3AF]">
                             {ex ? `${ex.muscleGroup} · ${ex.equipment}` : item.exerciseId}
                           </p>
                         </div>
@@ -207,7 +207,7 @@ export function RoutineEditorModal({
 
                       <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <label className="block text-[10px] text-[#9CA3AF] mb-0.5">Séries</label>
+                          <label className="block text-[0.75rem] text-[#9CA3AF] mb-0.5">Séries</label>
                           <input
                             type="number"
                             min={1}
@@ -220,7 +220,7 @@ export function RoutineEditorModal({
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-[#9CA3AF] mb-0.5">Reps alvo</label>
+                          <label className="block text-[0.75rem] text-[#9CA3AF] mb-0.5">Reps alvo</label>
                           <input
                             type="text"
                             value={item.targetReps}
@@ -230,7 +230,7 @@ export function RoutineEditorModal({
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-[#9CA3AF] mb-0.5">Descanso (s)</label>
+                          <label className="block text-[0.75rem] text-[#9CA3AF] mb-0.5">Descanso (s)</label>
                           <input
                             type="number"
                             min={15}

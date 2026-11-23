@@ -1,6 +1,9 @@
 # GymLog PWA — Controle de Treinos, Nutrição e Evolução
 
-Aplicação web progressiva (PWA) **100% gratuita**, **offline-first** e **sem backend**, desenvolvida para montar e atualizar treinos, controlar calorias/macronutrientes, registrar medidas corporais e acompanhar a evolução no celular Android ou no computador.
+Aplicação web progressiva (PWA) **100% gratuita**, **offline-first** e **sem backend**, desenvolvida para montar e atualizar treinos (fichas A/B/C/D editáveis), controlar calorias/macronutrientes, personalizar aparência de leitura e acompanhar a evolução no celular Android ou no computador.
+
+- **Aplicativo publicado (GitHub Pages):** https://lucasgmsilveira.github.io/fitness-app/
+- **Repositório:** https://github.com/lucasgmsilveira/fitness-app
 
 > **Privacidade:** Todos os dados ficam armazenados exclusivamente no navegador do seu dispositivo via IndexedDB (`Dexie.js`). Não há login, servidor, telemetria nem sincronização automática. Para mover dados entre celular e computador, use a exportação/importação manual em JSON na aba **Ajustes**.
 

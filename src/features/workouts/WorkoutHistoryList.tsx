@@ -110,12 +110,12 @@ export function WorkoutHistoryList({ sessions }: WorkoutHistoryListProps) {
                         <p className="text-xs font-semibold text-[#F4F4F6]">{ex.exerciseName}</p>
                         <div className="mt-1.5 flex flex-wrap gap-1.5">
                           {done.length === 0 ? (
-                            <span className="text-[11px] text-[#6B7280]">Sem séries concluídas</span>
+                            <span className="text-[0.8125rem] text-[#6B7280]">Sem séries concluídas</span>
                           ) : (
                             done.map((s, idx) => (
                               <span
                                 key={s.id}
-                                className="px-2 py-1 rounded-lg bg-[#141418] border border-[#2C2C35] text-[11px] text-[#D1D5DB] tabular-nums"
+                                className="px-2 py-1 rounded-lg bg-[#141418] border border-[#2C2C35] text-[0.8125rem] text-[#D1D5DB] tabular-nums"
                               >
                                 #{idx + 1}: {s.weightKg ?? 0}kg × {s.reps ?? 0}
                                 {s.intensity ? ` (${s.intensity})` : ''}
@@ -131,7 +131,7 @@ export function WorkoutHistoryList({ sessions }: WorkoutHistoryListProps) {
                 {/* Atualização tardia da resposta lombar (24-48h) */}
                 <div className="rounded-xl bg-[#1E1E24] p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-[#9CA3AF]">
+                    <span className="text-[0.8125rem] text-[#9CA3AF]">
                       Ajustar check-in lombar desta sessão:
                     </span>
                     <button
@@ -154,7 +154,7 @@ export function WorkoutHistoryList({ sessions }: WorkoutHistoryListProps) {
                             session.lumbarScore === n ? null : n
                           )
                         }
-                        className={`py-1 rounded text-[11px] font-semibold border ${
+                        className={`py-1 rounded text-[0.8125rem] font-semibold border ${
                           session.lumbarScore === n
                             ? 'border-[#84CC16] bg-[#84CC16]/20 text-[#84CC16]'
                             : 'border-[#2C2C35] bg-[#141418] text-[#9CA3AF]'

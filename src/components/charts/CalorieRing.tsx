@@ -45,7 +45,7 @@ export function CalorieRing({ consumed, target }: CalorieRingProps) {
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke={isOver ? '#EF4444' : '#F97316'}
+            stroke={isOver ? '#EF4444' : 'var(--accent-primary)'}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -56,12 +56,12 @@ export function CalorieRing({ consumed, target }: CalorieRingProps) {
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
           <span
             className={`text-2xl font-bold tabular-nums leading-none ${
-              isOver ? 'text-red-400' : 'text-[#F97316]'
+              isOver ? 'text-red-400' : 'text-[var(--accent-primary)]'
             }`}
           >
             {Math.abs(diff)}
           </span>
-          <span className="text-[11px] text-[#9CA3AF] mt-1 leading-tight">
+          <span className="text-xs text-[#9CA3AF] mt-1 leading-tight">
             {isOver ? 'kcal acima' : 'kcal restantes'}
           </span>
         </div>

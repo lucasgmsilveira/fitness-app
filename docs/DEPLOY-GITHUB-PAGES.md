@@ -21,16 +21,21 @@ Abra o endereço exibido no terminal (ex.: `http://localhost:4173`) para verific
 
 ---
 
-## 2. Criar o repositório no GitHub (somente da pasta `app/`)
+## 2. Repositório no GitHub (somente da pasta `app/`)
 
-1. Crie uma conta gratuita no [GitHub](https://github.com) (se ainda não tiver) e crie um novo repositório vazio (por exemplo, `gymlog-app`), **sem** marcar "Add a README".
+- **Repositório oficial da PWA:** https://github.com/lucasgmsilveira/fitness-app
+- **Endereço publicado (GitHub Pages):** https://lucasgmsilveira.github.io/fitness-app/
+
+Caso precise configurar do zero em outro repositório:
+
+1. Crie uma conta gratuita no [GitHub](https://github.com) (se ainda não tiver) e crie um novo repositório vazio (por exemplo, `fitness-app`), **sem** marcar "Add a README".
 2. No computador, abra o terminal **dentro da pasta `app/`** (`d:\me\2b_v1\Projetos\gym\app`):
 
 ```bash
 git init -b main
 git add .
 git commit -m "Versão inicial do GymLog PWA"
-git remote add origin https://github.com/SEU_USUARIO/gymlog-app.git
+git remote add origin https://github.com/lucasgmsilveira/fitness-app.git
 git push -u origin main
 ```
 
@@ -41,10 +46,10 @@ git push -u origin main
 1. No repositório do GitHub, acesse **Settings → Pages**.
 2. Em **Build and deployment → Source**, selecione **GitHub Actions**.
 3. Vá na aba **Actions** do repositório: o workflow **"Publicar PWA no GitHub Pages"** (`.github/workflows/deploy-pages.yml`) será executado automaticamente a cada `push` na branch `main`.
-4. Ao concluir (ícone verde), o link público aparecerá no próprio card de deploy e em **Settings → Pages**, no formato:
-   `https://SEU_USUARIO.github.io/gymlog-app/`
+4. Ao concluir (ícone verde), o aplicativo ficará disponível em:
+   https://lucasgmsilveira.github.io/fitness-app/
 
-> O workflow detecta automaticamente o nome do repositório e injeta `VITE_BASE_PATH=/gymlog-app/` (ou `/` se for um repositório `SEU_USUARIO.github.io`), configurando corretamente o `manifest.webmanifest` e o Service Worker.
+> O workflow detecta automaticamente o nome do repositório (`fitness-app`) e injeta `VITE_BASE_PATH=/fitness-app/` (ou `/` se for um repositório `<usuario>.github.io`), configurando corretamente o `manifest.webmanifest` e o Service Worker.
 
 ---
 

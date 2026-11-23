@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { RotateCcw, Smartphone } from 'lucide-react';
+import { Dumbbell, RotateCcw, Smartphone } from 'lucide-react';
 import { db } from '../../db/database';
-import { resetDatabase } from '../../db/seed';
+import { applyStarterRoutinesABCD, resetDatabase } from '../../db/seed';
 import type { DailyCheckin, WorkoutSession } from '../../db/types';
 import { AppShell } from '../../components/layout/AppShell';
 import { Card } from '../../components/ui/Card';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { AppearancePanel } from './AppearancePanel';
 import { BackupRestorePanel } from './BackupRestorePanel';
 import { BodyMetricsPanel } from './BodyMetricsPanel';
 import { LumbarCheckinPanel } from './LumbarCheckinPanel';
@@ -31,6 +32,7 @@ export function SettingsPage({
   lastBackupAt,
 }: SettingsPageProps) {
   const [resetMode, setResetMode] = useState<'seed' | 'empty' | null>(null);
+  const [applyAbcdOpen, setApplyAbcdOpen] = useState(false);
 
   const isStandalone =
     typeof window !== 'undefined' &&
@@ -44,8 +46,18 @@ export function SettingsPage({
     setResetMode(null);
   }
 
+  async function handleApplyAbcd() {
+    await applyStarterRoutinesABCD(db);
+    setApplyAbcdOpen(false);
+  }
+
   return (
-    <AppShell title="Ajustes & Evolução" subtitle="Backup JSON, medidas, check-in e manutenção">
+    <AppShell
+      title="Ajustes & Evolução"
+      subtitle="Visual, backup JSON, medidas e check-in"
+    >
+      <AppearancePanel />
+
       <BackupRestorePanel
         counts={{
           ...counts,
@@ -68,7 +80,11 @@ export function SettingsPage({
           <span className="text-[#F4F4F6] font-medium">
             {isStandalone ? 'Executando como App instalado' : 'Executando no navegador'}
           </span>
-          . No Android, abra o link no Chrome, toque no menu (⋮) e selecione{' '}
+          . No Android, abra{' '}
+          <span className="text-[#D1D5DB] break-all">
+            https://lucasgmsilveira.github.io/fitness-app/
+          </span>{' '}
+          no Chrome, toque no menu (⋮) e selecione{' '}
           <strong className="text-[#F4F4F6]">Adicionar à tela inicial → Instalar</strong>.
           Após o primeiro carregamento, os dados e telas funcionam sem internet.
         </p>
@@ -82,6 +98,14 @@ export function SettingsPage({
         <p className="text-xs text-[#9CA3AF]">
           Exporte um backup JSON antes de limpar ou reiniciar os dados locais.
         </p>
+        <button
+          type="button"
+          onClick={() => setApplyAbcdOpen(true)}
+          className="w-full py-2.5 px-3 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-xs font-semibold text-[#84CC16] hover:border-[#84CC16]/50 inline-flex items-center justify-center gap-2"
+        >
+          <Dumbbell className="w-4 h-4" />
+          Carregar rotinas A/B/C/D (mantém histórico)
+        </button>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <button
             type="button"
@@ -99,6 +123,16 @@ export function SettingsPage({
           </button>
         </div>
       </Card>
+
+      <ConfirmDialog
+        open={applyAbcdOpen}
+        onClose={() => setApplyAbcdOpen(false)}
+        onConfirm={handleApplyAbcd}
+        variant="primary"
+        title="Carregar rotinas A/B/C/D?"
+        description="As fichas modelo A, B, C e D serão carregadas substituindo as rotinas atuais. Todo o seu histórico de treinos, refeições e check-ins será preservado."
+        confirmLabel="Carregar Rotinas"
+      />
 
       <ConfirmDialog
         open={resetMode !== null}

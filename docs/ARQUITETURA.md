@@ -2,6 +2,9 @@
 
 Este documento orienta desenvolvedores e agentes de IA que precisarem manter, corrigir ou adicionar funcionalidades ao aplicativo no futuro.
 
+- **URL de produção (GitHub Pages):** https://lucasgmsilveira.github.io/fitness-app/
+- **Repositório:** https://github.com/lucasgmsilveira/fitness-app
+
 ## 1. Estrutura de Pastas (`app/`)
 
 ```text
@@ -26,9 +29,10 @@ app/
 │   ├── features/
 │   │   ├── dashboard/DashboardPage.tsx # Painel inicial (calorias, macros, PRs, gráficos)
 │   │   ├── nutrition/                  # Diário alimentar, metas, catálogo de alimentos
-│   │   ├── settings/                   # Backup JSON, medidas corporais, check-in lombar
-│   │   └── workouts/                   # Rotinas, treino ativo, timer de descanso, histórico
+│   │   ├── settings/                   # Aparência, backup JSON, medidas corporais, check-in
+│   │   └── workouts/                   # Rotinas A/B/C/D, treino ativo, descanso, histórico
 │   ├── utils/
+│   │   ├── appearance.ts               # Preferências visuais (fonte, destaque, contraste, densidade)
 │   │   ├── date.ts                     # Datas sempre no fuso local (YYYY-MM-DD)
 │   │   ├── nutritionMath.ts            # Escala de macros por gramas/porções e somatórios
 │   │   └── workoutStats.ts             # Volume, PRs, frequência semanal e progressão
@@ -48,13 +52,13 @@ Definido em [`src/db/database.ts`](../src/db/database.ts) (`GymLogDB`, versão `
 | Tabela | Chave / Índices | Conteúdo |
 | :--- | :--- | :--- |
 | `exercises` | `id, name, muscleGroup` | Catálogo de exercícios (padrão + personalizados) |
-| `routines` | `id, order, name` | Fichas de treino A/B/C editáveis |
+| `routines` | `id, order, name` | Fichas de treino A/B/C/D editáveis |
 | `workoutSessions` | `id, status, date, startedAt, routineId` | Sessões ativas (`status: 'active'`) e concluídas (`completed`) |
 | `foods` | `id, name` | Catálogo de alimentos com valores por porção |
 | `mealEntries` | `id, date, mealType, [date+mealType]` | Itens consumidos no diário alimentar por data |
 | `nutritionGoals` | `id` (`'default'`) | Metas diárias de kcal, macros e água |
 | `dailyCheckins` | `date` (`YYYY-MM-DD`) | Peso, medidas corporais, água e nota lombar (0–10) |
-| `appMeta` | `key` | Metadados internos (`seeded`, `lastBackupAt`, `lastRestoreAt`) |
+| `appMeta` | `key` | Metadados internos (`seeded`, `seedVersion`, `lastBackupAt`, `lastRestoreAt`) |
 
 ### Como evoluir o schema do banco no futuro (Migrations)
 

@@ -88,7 +88,7 @@ export function RestTimerBar({
             key={sec}
             type="button"
             onClick={() => onResetPreset(sec)}
-            className={`flex-1 py-1 rounded-lg text-[11px] font-medium border transition-colors ${
+            className={`flex-1 py-1 rounded-lg text-[0.8125rem] font-medium border transition-colors ${
               totalSec === sec
                 ? 'bg-[#F97316]/15 text-[#F97316] border-[#F97316]/40'
                 : 'bg-[#1E1E24] text-[#9CA3AF] border-transparent hover:text-[#F4F4F6]'

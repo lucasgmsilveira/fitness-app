@@ -163,7 +163,7 @@ export function DashboardPage({
           className="w-full text-left p-3.5 rounded-2xl bg-[#84CC16]/15 border border-[#84CC16]/40 flex items-center justify-between gap-3"
         >
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#84CC16]">
+            <p className="text-[0.8125rem] font-bold uppercase tracking-wider text-[#84CC16]">
               Treino Ativo
             </p>
             <p className="text-sm font-semibold text-[#F4F4F6]">
@@ -213,7 +213,7 @@ export function DashboardPage({
               </div>
               <div className="flex items-baseline justify-between gap-1 tabular-nums">
                 <span className="text-sm font-bold text-[#F4F4F6]">{m.value}g</span>
-                <span className="text-[11px] text-[#9CA3AF]">{m.target}g</span>
+                <span className="text-[0.8125rem] text-[#9CA3AF]">{m.target}g</span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-[#25252C] overflow-hidden">
                 <div
@@ -257,7 +257,7 @@ export function DashboardPage({
                   <p className="text-sm font-medium text-[#F4F4F6] truncate">
                     {pr.exerciseName}
                   </p>
-                  <p className="text-[11px] text-[#9CA3AF]">{pr.date}</p>
+                  <p className="text-[0.8125rem] text-[#9CA3AF]">{pr.date}</p>
                 </div>
                 <span className="text-base font-bold text-[#F4F4F6] tabular-nums shrink-0">
                   {pr.maxWeightKg} kg
@@ -285,7 +285,7 @@ export function DashboardPage({
                 key={key}
                 type="button"
                 onClick={() => setChartView(key)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+                className={`px-2.5 py-1 rounded-lg text-[0.8125rem] font-medium transition-colors ${
                   chartView === key
                     ? 'bg-[#2C2C36] text-[#F4F4F6]'
                     : 'text-[#9CA3AF] hover:text-white'
@@ -353,7 +353,7 @@ export function DashboardPage({
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold text-[#F4F4F6]">Check-in de Hoje</p>
-            <p className="text-[11px] text-[#9CA3AF] truncate tabular-nums">
+            <p className="text-[0.8125rem] text-[#9CA3AF] truncate tabular-nums">
               Peso: {todayCheckin?.weightKg != null ? `${todayCheckin.weightKg} kg` : '—'} ·{' '}
               Lombar:{' '}
               {todayCheckin?.lumbarScore !== null && todayCheckin?.lumbarScore !== undefined

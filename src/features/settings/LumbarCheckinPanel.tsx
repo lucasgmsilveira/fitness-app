@@ -58,7 +58,7 @@ export function LumbarCheckinPanel({ checkins }: LumbarCheckinPanelProps) {
 
       <form onSubmit={handleSave} className="space-y-3">
         <div>
-          <label className="block text-[11px] text-[#9CA3AF] mb-1">Data</label>
+          <label className="block text-[0.8125rem] text-[#9CA3AF] mb-1">Data</label>
           <input
             type="date"
             value={date}
@@ -111,7 +111,7 @@ export function LumbarCheckinPanel({ checkins }: LumbarCheckinPanelProps) {
 
       {recent.length > 0 && (
         <div className="space-y-1.5 pt-2 border-t border-[#25252C]">
-          <p className="text-[11px] font-semibold text-[#9CA3AF]">Últimos check-ins</p>
+          <p className="text-[0.8125rem] font-semibold text-[#9CA3AF]">Últimos check-ins</p>
           {recent.map((item) => (
             <div
               key={item.date}

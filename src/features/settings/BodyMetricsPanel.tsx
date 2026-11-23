@@ -84,7 +84,7 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
       <form onSubmit={handleSave} className="space-y-3">
         <div className="grid grid-cols-2 gap-2.5">
           <div>
-            <label className="block text-[11px] text-[#9CA3AF] mb-1">Data</label>
+            <label className="block text-[0.8125rem] text-[#9CA3AF] mb-1">Data</label>
             <input
               type="date"
               value={date}
@@ -93,7 +93,7 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
             />
           </div>
           <div>
-            <label className="block text-[11px] text-[#9CA3AF] mb-1">Peso (kg)</label>
+            <label className="block text-[0.8125rem] text-[#9CA3AF] mb-1">Peso (kg)</label>
             <input
               type="number"
               step="0.1"
@@ -108,7 +108,7 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
 
         <div className="grid grid-cols-4 gap-2">
           <div>
-            <label className="block text-[10px] text-[#9CA3AF] mb-1">Cintura (cm)</label>
+            <label className="block text-[0.75rem] text-[#9CA3AF] mb-1">Cintura (cm)</label>
             <input
               type="number"
               step="0.5"
@@ -118,7 +118,7 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
             />
           </div>
           <div>
-            <label className="block text-[10px] text-[#9CA3AF] mb-1">Peito (cm)</label>
+            <label className="block text-[0.75rem] text-[#9CA3AF] mb-1">Peito (cm)</label>
             <input
               type="number"
               step="0.5"
@@ -128,7 +128,7 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
             />
           </div>
           <div>
-            <label className="block text-[10px] text-[#9CA3AF] mb-1">Braço (cm)</label>
+            <label className="block text-[0.75rem] text-[#9CA3AF] mb-1">Braço (cm)</label>
             <input
               type="number"
               step="0.5"
@@ -138,7 +138,7 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
             />
           </div>
           <div>
-            <label className="block text-[10px] text-[#9CA3AF] mb-1">Coxa (cm)</label>
+            <label className="block text-[0.75rem] text-[#9CA3AF] mb-1">Coxa (cm)</label>
             <input
               type="number"
               step="0.5"
@@ -159,7 +159,7 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
 
       {recentRecords.length > 0 && (
         <div className="space-y-1.5 pt-2 border-t border-[#25252C]">
-          <p className="text-[11px] font-semibold text-[#9CA3AF]">Registros recentes</p>
+          <p className="text-[0.8125rem] font-semibold text-[#9CA3AF]">Registros recentes</p>
           {recentRecords.map((item) => (
             <div
               key={item.date}

@@ -73,7 +73,7 @@ export function NutritionGoalsModal({ open, onClose, goal }: NutritionGoalsModal
             <button
               type="button"
               onClick={() => setCalories(estimatedFromMacros)}
-              className="text-[11px] text-[#F97316] hover:underline"
+              className="text-[0.8125rem] text-[#F97316] hover:underline"
             >
               Usar soma dos macros ({estimatedFromMacros} kcal)
             </button>

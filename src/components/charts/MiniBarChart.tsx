@@ -14,7 +14,7 @@ export function MiniBarChart({ data }: MiniBarChartProps) {
           const pct = Math.round((item.count / maxCount) * 100);
           return (
             <div key={item.weekStart} className="flex flex-col items-center gap-1.5 h-full justify-end">
-              <span className="text-[11px] font-semibold text-[#F4F4F6] tabular-nums">
+              <span className="text-[0.8125rem] font-semibold text-[#F4F4F6] tabular-nums">
                 {item.count}
               </span>
               <div className="w-full max-w-8 h-20 bg-[#1E1E24] rounded-lg flex items-end overflow-hidden p-0.5">
@@ -23,12 +23,12 @@ export function MiniBarChart({ data }: MiniBarChartProps) {
                   style={{ height: `${Math.max(item.count > 0 ? 12 : 0, pct)}%` }}
                 />
               </div>
-              <span className="text-[10px] text-[#9CA3AF] tabular-nums">{item.label}</span>
+              <span className="text-[0.75rem] text-[#9CA3AF] tabular-nums">{item.label}</span>
             </div>
           );
         })}
       </div>
-      <p className="text-[11px] text-[#9CA3AF] text-center mt-2">
+      <p className="text-[0.8125rem] text-[#9CA3AF] text-center mt-2">
         Sessões concluídas por semana (início na segunda-feira)
       </p>
     </div>

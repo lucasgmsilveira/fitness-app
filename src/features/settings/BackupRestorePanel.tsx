@@ -95,19 +95,19 @@ export function BackupRestorePanel({ counts, lastBackupAt }: BackupRestorePanelP
       <div className="grid grid-cols-3 gap-2 text-center rounded-xl bg-[#1E1E24] p-2.5">
         <div>
           <p className="text-sm font-bold tabular-nums">{counts.routines}</p>
-          <p className="text-[10px] text-[#9CA3AF]">Rotinas</p>
+          <p className="text-[0.75rem] text-[#9CA3AF]">Rotinas</p>
         </div>
         <div>
           <p className="text-sm font-bold tabular-nums">{counts.sessions}</p>
-          <p className="text-[10px] text-[#9CA3AF]">Treinos</p>
+          <p className="text-[0.75rem] text-[#9CA3AF]">Treinos</p>
         </div>
         <div>
           <p className="text-sm font-bold tabular-nums">{counts.meals}</p>
-          <p className="text-[10px] text-[#9CA3AF]">Refeições</p>
+          <p className="text-[0.75rem] text-[#9CA3AF]">Refeições</p>
         </div>
       </div>
 
-      <p className="text-[11px] text-[#9CA3AF]">
+      <p className="text-[0.8125rem] text-[#9CA3AF]">
         Último backup neste aparelho: <span className="text-[#D1D5DB]">{formattedLastBackup}</span>
       </p>
 

@@ -368,7 +368,7 @@ export function ActiveWorkoutView({
                       {exLog.exerciseName}
                     </p>
                     {exLog.supersetGroup && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                      <span className="text-[0.75rem] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">
                         {exLog.supersetGroup}
                       </span>
                     )}
@@ -403,7 +403,7 @@ export function ActiveWorkoutView({
 
               {isExpanded && (
                 <div className="px-3.5 pb-4 pt-1 border-t border-[#22222A] space-y-3">
-                  <div className="flex items-center justify-between gap-2 text-[11px]">
+                  <div className="flex items-center justify-between gap-2 text-[0.8125rem]">
                     <span className="text-[#9CA3AF] truncate">
                       {previous
                         ? `Anterior (${formatDateBr(previous.date)}): ${previous.summary}`
@@ -420,7 +420,7 @@ export function ActiveWorkoutView({
                   </div>
 
                   {/* Cabeçalho da tabela de séries */}
-                  <div className="grid grid-cols-[2rem_1fr_1fr_4.5rem_2.4rem] gap-1.5 text-[11px] font-medium text-[#9CA3AF] px-1 text-center">
+                  <div className="grid grid-cols-[2rem_1fr_1fr_4.5rem_2.4rem] gap-1.5 text-[0.8125rem] font-medium text-[#9CA3AF] px-1 text-center">
                     <span>Série</span>
                     <span>Carga (kg)</span>
                     <span>Reps</span>
@@ -527,7 +527,7 @@ export function ActiveWorkoutView({
                           {/* Seletor rápido de RIR quando intensidade estiver marcada */}
                           {set.intensity !== null && (
                             <div className="flex items-center justify-end gap-1 pr-1">
-                              <span className="text-[10px] text-[#9CA3AF] mr-1">RIR:</span>
+                              <span className="text-[0.75rem] text-[#9CA3AF] mr-1">RIR:</span>
                               {[0, 1, 2, 3, 4].map((rirVal) => (
                                 <button
                                   key={rirVal}
@@ -537,7 +537,7 @@ export function ActiveWorkoutView({
                                       rir: set.rir === rirVal ? null : rirVal,
                                     })
                                   }
-                                  className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${
+                                  className={`px-1.5 py-0.5 rounded text-[0.75rem] font-medium border ${
                                     set.rir === rirVal
                                       ? 'bg-[#F97316]/20 border-[#F97316]/60 text-[#F97316]'
                                       : 'bg-[#141418] border-[#25252C] text-[#9CA3AF]'
@@ -608,7 +608,7 @@ export function ActiveWorkoutView({
                 setRestOpen(false);
               }
             }}
-            className="flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-[#D1D5DB] hover:text-[#F97316]"
+            className="flex flex-col items-center justify-center gap-1 text-[0.8125rem] font-medium text-[#D1D5DB] hover:text-[#F97316]"
           >
             <Timer className="w-5 h-5" />
             <span>Descanso</span>
@@ -617,7 +617,7 @@ export function ActiveWorkoutView({
           <button
             type="button"
             onClick={onMinimize}
-            className="flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-[#D1D5DB] hover:text-white"
+            className="flex flex-col items-center justify-center gap-1 text-[0.8125rem] font-medium text-[#D1D5DB] hover:text-white"
           >
             <Minimize2 className="w-5 h-5" />
             <span>Minimizar</span>
@@ -626,7 +626,7 @@ export function ActiveWorkoutView({
           <button
             type="button"
             onClick={() => setOverviewOpen(true)}
-            className="flex flex-col items-center justify-center gap-1 text-[11px] font-semibold text-[#84CC16]"
+            className="flex flex-col items-center justify-center gap-1 text-[0.8125rem] font-semibold text-[#84CC16]"
           >
             <Check className="w-5 h-5" />
             <span>Finalizar</span>

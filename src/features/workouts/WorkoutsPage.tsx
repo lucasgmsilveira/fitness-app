@@ -175,7 +175,7 @@ export function WorkoutsPage({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-xs text-[#9CA3AF]">
-              Monte suas fichas A/B/C e edite a qualquer momento
+              Monte suas fichas A/B/C/D e edite a qualquer momento
             </p>
             <button
               type="button"
@@ -263,15 +263,22 @@ export function WorkoutsPage({
                     return (
                       <div
                         key={`${item.exerciseId}-${idx}`}
-                        className="flex items-center justify-between gap-2 text-xs py-1 border-t border-[#22222A]"
+                        className="py-1.5 border-t border-[#22222A] space-y-0.5"
                       >
-                        <span className="text-[#D1D5DB] truncate">
-                          {ex?.name ?? 'Exercício'}
-                        </span>
-                        <span className="text-[#9CA3AF] shrink-0 tabular-nums">
-                          {item.targetSets}×{item.targetReps}
-                          {prev ? ` · Últ: ${prev.summary.split(' · ')[0]}` : ''}
-                        </span>
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <span className="text-[#D1D5DB] truncate font-medium">
+                            {ex?.name ?? 'Exercício'}
+                          </span>
+                          <span className="text-[#9CA3AF] shrink-0 tabular-nums">
+                            {item.targetSets}×{item.targetReps}
+                            {prev ? ` · Últ: ${prev.summary.split(' · ')[0]}` : ''}
+                          </span>
+                        </div>
+                        {item.notes && (
+                          <p className="text-[0.75rem] text-[#9CA3AF] leading-snug">
+                            {item.notes}
+                          </p>
+                        )}
                       </div>
                     );
                   })}

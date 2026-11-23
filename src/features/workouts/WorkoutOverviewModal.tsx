@@ -89,27 +89,27 @@ export function WorkoutOverviewModal({
       <div className="space-y-4">
         {/* Totais estilo imagem 1 */}
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
+          <p className="text-[0.8125rem] font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
             Seus Totais
           </p>
           <div className="grid grid-cols-3 gap-2.5">
             <div className="rounded-xl bg-[#1E1E24] border border-[#2A2A33] p-3 text-center">
               <Dumbbell className="w-4 h-4 text-[#9CA3AF] mx-auto mb-1" />
-              <p className="text-[10px] uppercase text-[#9CA3AF]">Volume</p>
+              <p className="text-[0.75rem] uppercase text-[#9CA3AF]">Volume</p>
               <p className="text-base font-bold tabular-nums text-[#F4F4F6]">
                 {totals.totalVolumeKg} kg
               </p>
             </div>
             <div className="rounded-xl bg-[#1E1E24] border border-[#2A2A33] p-3 text-center">
               <Flame className="w-4 h-4 text-[#9CA3AF] mx-auto mb-1" />
-              <p className="text-[10px] uppercase text-[#9CA3AF]">Repetições</p>
+              <p className="text-[0.75rem] uppercase text-[#9CA3AF]">Repetições</p>
               <p className="text-base font-bold tabular-nums text-[#F4F4F6]">
                 {totals.totalReps}
               </p>
             </div>
             <div className="rounded-xl bg-[#1E1E24] border border-[#2A2A33] p-3 text-center">
               <Layers className="w-4 h-4 text-[#9CA3AF] mx-auto mb-1" />
-              <p className="text-[10px] uppercase text-[#9CA3AF]">Séries</p>
+              <p className="text-[0.75rem] uppercase text-[#9CA3AF]">Séries</p>
               <p className="text-base font-bold tabular-nums text-[#F4F4F6]">
                 {totals.totalSets}
               </p>
@@ -124,14 +124,14 @@ export function WorkoutOverviewModal({
               <p className="text-xs font-semibold text-[#F4F4F6]">
                 Check-in pós-treino: Bem-estar / Lombar
               </p>
-              <p className="text-[11px] text-[#9CA3AF]">
+              <p className="text-[0.8125rem] text-[#9CA3AF]">
                 0 = sem desconforto · 10 = desconforto alto (salvo só no seu dispositivo)
               </p>
             </div>
             <button
               type="button"
               onClick={() => setLumbarScore(lumbarScore === null ? 0 : null)}
-              className="text-[11px] text-[#9CA3AF] underline"
+              className="text-[0.8125rem] text-[#9CA3AF] underline"
             >
               {lumbarScore === null ? 'Marcar' : 'Omitir'}
             </button>
@@ -176,7 +176,7 @@ export function WorkoutOverviewModal({
 
         {/* Lista de exercícios registrados */}
         <div className="space-y-2.5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#9CA3AF]">
+          <p className="text-[0.8125rem] font-semibold uppercase tracking-wider text-[#9CA3AF]">
             Exercícios Registrados
           </p>
           {session.exercises.map((ex) => {
@@ -188,7 +188,7 @@ export function WorkoutOverviewModal({
               >
                 <div>
                   <p className="text-sm font-semibold text-[#F4F4F6]">{ex.exerciseName}</p>
-                  <p className="text-[11px] text-[#9CA3AF]">{ex.equipment}</p>
+                  <p className="text-[0.8125rem] text-[#9CA3AF]">{ex.equipment}</p>
                 </div>
                 {doneSets.length === 0 ? (
                   <p className="text-xs text-[#6B7280]">Nenhuma série marcada como concluída.</p>

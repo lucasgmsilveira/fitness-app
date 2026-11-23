@@ -203,7 +203,7 @@ export function AddMealEntryModal({
                         {f.calories} kcal
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#9CA3AF] mt-0.5">
+                    <p className="text-[0.8125rem] text-[#9CA3AF] mt-0.5">
                       Por {f.servingLabel}: {f.protein}g P · {f.carbs}g C · {f.fat}g G
                     </p>
                   </button>
@@ -220,7 +220,7 @@ export function AddMealEntryModal({
               <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-[#1E1E24] border border-[#2C2C35]">
                 <div>
                   <p className="text-sm font-semibold text-[#F4F4F6]">{selectedFood.name}</p>
-                  <p className="text-[11px] text-[#9CA3AF]">
+                  <p className="text-[0.8125rem] text-[#9CA3AF]">
                     Referência: {selectedFood.servingLabel} ({selectedFood.calories} kcal)
                   </p>
                 </div>
@@ -269,25 +269,25 @@ export function AddMealEntryModal({
               {previewMacros && (
                 <div className="grid grid-cols-4 gap-2 p-3 rounded-xl bg-[#141418] border border-[#25252C] text-center">
                   <div>
-                    <p className="text-[10px] text-[#9CA3AF]">Calorias</p>
+                    <p className="text-[0.75rem] text-[#9CA3AF]">Calorias</p>
                     <p className="text-sm font-bold text-[#F97316] tabular-nums">
                       {previewMacros.calories}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-red-400">Prot.</p>
+                    <p className="text-[0.75rem] text-red-400">Prot.</p>
                     <p className="text-sm font-bold text-[#F4F4F6] tabular-nums">
                       {previewMacros.protein}g
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-sky-400">Carbo</p>
+                    <p className="text-[0.75rem] text-sky-400">Carbo</p>
                     <p className="text-sm font-bold text-[#F4F4F6] tabular-nums">
                       {previewMacros.carbs}g
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-yellow-400">Gord.</p>
+                    <p className="text-[0.75rem] text-yellow-400">Gord.</p>
                     <p className="text-sm font-bold text-[#F4F4F6] tabular-nums">
                       {previewMacros.fat}g
                     </p>

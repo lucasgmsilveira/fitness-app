@@ -16,8 +16,10 @@ export function BottomNav({
   hasActiveWorkout = false,
 }: BottomNavProps) {
   const itemClass = (tab: AppTab) =>
-    `flex flex-col items-center justify-center gap-1 py-1.5 px-2 text-[11px] font-medium transition-colors ${
-      activeTab === tab ? 'text-[#F43F5E]' : 'text-[#9CA3AF] hover:text-[#F4F4F6]'
+    `flex flex-col items-center justify-center gap-1 py-1.5 px-2 text-xs font-medium transition-colors ${
+      activeTab === tab
+        ? 'text-[var(--accent-primary)]'
+        : 'text-[#9CA3AF] hover:text-[#F4F4F6]'
     }`;
 
   return (
@@ -49,7 +51,7 @@ export function BottomNav({
             type="button"
             onClick={onQuickAction}
             aria-label="Ação rápida"
-            className="relative -top-3 w-13 h-13 rounded-full bg-[#1C1C22] border border-[#32323D] shadow-lg flex items-center justify-center text-[#F43F5E] hover:bg-[#25252D] active:scale-95 transition-transform"
+            className="relative -top-3 w-13 h-13 rounded-full bg-[#1C1C22] border border-[#32323D] shadow-lg flex items-center justify-center text-[var(--accent-primary)] hover:bg-[#25252D] active:scale-95 transition-transform"
           >
             <Plus className="w-6 h-6 stroke-[2.5]" />
           </button>

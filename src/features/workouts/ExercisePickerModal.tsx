@@ -115,7 +115,7 @@ export function ExercisePickerModal({
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-[#F4F4F6] truncate">{ex.name}</p>
-                  <p className="text-[11px] text-[#9CA3AF]">
+                  <p className="text-[0.8125rem] text-[#9CA3AF]">
                     {ex.muscleGroup} · {ex.equipment} · {ex.defaultRestSec}s
                   </p>
                 </div>
