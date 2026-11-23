@@ -1,0 +1,108 @@
+# Arquitetura e Manutenção — GymLog PWA
+
+Este documento orienta desenvolvedores e agentes de IA que precisarem manter, corrigir ou adicionar funcionalidades ao aplicativo no futuro.
+
+## 1. Estrutura de Pastas (`app/`)
+
+```text
+app/
+├── .github/workflows/deploy-pages.yml  # Pipeline automático para GitHub Pages
+├── docs/
+│   ├── ARQUITETURA.md                  # Este documento
+│   └── DEPLOY-GITHUB-PAGES.md          # Guia de publicação e instalação no Android
+├── public/                             # Ícones PNG/SVG estáticos da PWA
+├── scripts/
+│   └── generate-icons.mjs              # Gerador Node puro dos ícones PNG (sem deps externas)
+├── src/
+│   ├── components/
+│   │   ├── charts/                     # CalorieRing, TrendLineChart, MiniBarChart (SVG puro)
+│   │   ├── layout/                     # AppShell, BottomNav, QuickActionSheet
+│   │   └── ui/                         # Card, Modal, ConfirmDialog, Badge, EmptyState
+│   ├── db/
+│   │   ├── types.ts                    # Interfaces TypeScript e constantes de domínio
+│   │   ├── database.ts                 # Instância Dexie (GymLogDB) e índices
+│   │   ├── seed.ts                     # Catálogo inicial genérico e resetDatabase()
+│   │   └── backup.ts                   # Exportação, validação e restauração atômica JSON
+│   ├── features/
+│   │   ├── dashboard/DashboardPage.tsx # Painel inicial (calorias, macros, PRs, gráficos)
+│   │   ├── nutrition/                  # Diário alimentar, metas, catálogo de alimentos
+│   │   ├── settings/                   # Backup JSON, medidas corporais, check-in lombar
+│   │   └── workouts/                   # Rotinas, treino ativo, timer de descanso, histórico
+│   ├── utils/
+│   │   ├── date.ts                     # Datas sempre no fuso local (YYYY-MM-DD)
+│   │   ├── nutritionMath.ts            # Escala de macros por gramas/porções e somatórios
+│   │   └── workoutStats.ts             # Volume, PRs, frequência semanal e progressão
+│   ├── App.tsx                         # Orquestração de abas, useLiveQuery e modais rápidos
+│   ├── main.tsx                        # Ponto de entrada + registerSW({ immediate: true })
+│   └── index.css                       # Tailwind CSS v4 + tokens de tema escuro
+├── tests/
+│   ├── calculations.test.ts            # Testes unitários de datas, treinos e nutrição
+│   └── backup.test.ts                  # Testes de seed, exportação e restauração no Dexie
+└── vite.config.ts                      # Configuração de base path + VitePWA/Workbox
+```
+
+## 2. Banco de Dados Local (IndexedDB + Dexie.js)
+
+Definido em [`src/db/database.ts`](../src/db/database.ts) (`GymLogDB`, versão `1`):
+
+| Tabela | Chave / Índices | Conteúdo |
+| :--- | :--- | :--- |
+| `exercises` | `id, name, muscleGroup` | Catálogo de exercícios (padrão + personalizados) |
+| `routines` | `id, order, name` | Fichas de treino A/B/C editáveis |
+| `workoutSessions` | `id, status, date, startedAt, routineId` | Sessões ativas (`status: 'active'`) e concluídas (`completed`) |
+| `foods` | `id, name` | Catálogo de alimentos com valores por porção |
+| `mealEntries` | `id, date, mealType, [date+mealType]` | Itens consumidos no diário alimentar por data |
+| `nutritionGoals` | `id` (`'default'`) | Metas diárias de kcal, macros e água |
+| `dailyCheckins` | `date` (`YYYY-MM-DD`) | Peso, medidas corporais, água e nota lombar (0–10) |
+| `appMeta` | `key` | Metadados internos (`seeded`, `lastBackupAt`, `lastRestoreAt`) |
+
+### Como evoluir o schema do banco no futuro (Migrations)
+
+**Nunca altere `this.version(1)` diretamente se o app já estiver em uso.** Sempre adicione uma nova versão em `GymLogDB`:
+
+```ts
+this.version(1).stores({ ... });
+this.version(2).stores({
+  // Apenas as tabelas que mudaram de índice ou novas tabelas
+  dailyCheckins: 'date, updatedAt',
+}).upgrade((tx) => {
+  // Migração de dados existentes, se necessário
+});
+```
+
+## 3. Formato do Backup JSON (`schemaVersion: 1`)
+
+Implementado em [`src/db/backup.ts`](../src/db/backup.ts):
+
+```json
+{
+  "app": "gymlog-pwa",
+  "schemaVersion": 1,
+  "exportedAt": "2026-11-22T23:00:00.000Z",
+  "data": {
+    "exercises": [],
+    "routines": [],
+    "workoutSessions": [],
+    "foods": [],
+    "mealEntries": [],
+    "nutritionGoals": [],
+    "dailyCheckins": []
+  }
+}
+```
+
+Regras importantes ao evoluir o backup:
+- A importação usa `parseAndValidateBackup` para validar `app === 'gymlog-pwa'`, `schemaVersion` e todas as coleções antes de abrir a caixa de confirmação.
+- A restauração usa transação `db.transaction('rw', ...)` para limpar e reescrever todas as tabelas atomicamente.
+- Se no futuro `schemaVersion` passar para `2`, mantenha compatibilidade lendo backups `schemaVersion: 1` e preenchendo valores padrão nos campos novos.
+
+## 4. Regras e Convenções Críticas
+
+1. **Privacidade estrita (`../AGENTS.md`)**: nunca coloque dados pessoais reais (idade, altura, peso, histórico clínico ou detalhes de lesões) no código-fonte de `app/`, pois este diretório pode ser publicado no GitHub Pages.
+2. **Datas sempre no fuso local**: use `getLocalDateString()` de `src/utils/date.ts`. **Nunca** use `new Date().toISOString().slice(0, 10)` para agrupar refeições ou treinos do dia, pois em fusos negativos (ex.: UTC-3) o dia vira às 21h.
+3. **Subcaminho no GitHub Pages (`VITE_BASE_PATH`)**:
+   - Referências estáticas em `index.html` devem usar `%BASE_URL%`.
+   - `vite.config.ts` lê `process.env.VITE_BASE_PATH || '/'` e aplica o mesmo `base` em `manifest.start_url`, `manifest.scope` e no asset prefix do Vite.
+   - `workbox.navigateFallback` usa `'index.html'` (relativo ao `base`).
+4. **Regenerar ícones PWA**: caso altere o visual dos ícones, edite `scripts/generate-icons.mjs` e execute `npm run generate-icons`.
+5. **Validação após mudanças**: sempre rode `npm test` e `npm run build` antes de fazer push.
