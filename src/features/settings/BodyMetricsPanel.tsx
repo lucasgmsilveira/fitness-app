@@ -96,7 +96,8 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
             <label className="block text-[0.8125rem] text-[#9CA3AF] mb-1">Peso (kg)</label>
             <input
               type="number"
-              step="0.1"
+              inputMode="decimal"
+              step="any"
               min={0}
               placeholder="Ex: 72.5"
               value={weightKg}
@@ -111,7 +112,9 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
             <label className="block text-[0.75rem] text-[#9CA3AF] mb-1">Cintura (cm)</label>
             <input
               type="number"
-              step="0.5"
+              inputMode="decimal"
+              step="any"
+              min={0}
               value={waistCm}
               onChange={(e) => setWaistCm(e.target.value)}
               className="w-full px-2 py-2 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-xs text-[#F4F4F6]"
@@ -121,7 +124,9 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
             <label className="block text-[0.75rem] text-[#9CA3AF] mb-1">Peito (cm)</label>
             <input
               type="number"
-              step="0.5"
+              inputMode="decimal"
+              step="any"
+              min={0}
               value={chestCm}
               onChange={(e) => setChestCm(e.target.value)}
               className="w-full px-2 py-2 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-xs text-[#F4F4F6]"
@@ -131,7 +136,9 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
             <label className="block text-[0.75rem] text-[#9CA3AF] mb-1">Braço (cm)</label>
             <input
               type="number"
-              step="0.5"
+              inputMode="decimal"
+              step="any"
+              min={0}
               value={armCm}
               onChange={(e) => setArmCm(e.target.value)}
               className="w-full px-2 py-2 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-xs text-[#F4F4F6]"
@@ -141,7 +148,9 @@ export function BodyMetricsPanel({ checkins }: BodyMetricsPanelProps) {
             <label className="block text-[0.75rem] text-[#9CA3AF] mb-1">Coxa (cm)</label>
             <input
               type="number"
-              step="0.5"
+              inputMode="decimal"
+              step="any"
+              min={0}
               value={thighCm}
               onChange={(e) => setThighCm(e.target.value)}
               className="w-full px-2 py-2 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-xs text-[#F4F4F6]"

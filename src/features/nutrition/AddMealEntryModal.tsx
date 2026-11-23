@@ -14,6 +14,13 @@ interface AddMealEntryModalProps {
   editingEntry?: MealEntry | null;
 }
 
+function parseDecimal(raw: string): number {
+  const normalized = raw.trim().replace(',', '.');
+  if (!normalized) return 0;
+  const num = Number(normalized);
+  return Number.isFinite(num) ? num : 0;
+}
+
 export function AddMealEntryModal({
   open,
   onClose,
@@ -27,7 +34,8 @@ export function AddMealEntryModal({
   const [query, setQuery] = useState('');
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [unitMode, setUnitMode] = useState<'grams' | 'servings'>('grams');
-  const [quantity, setQuantity] = useState<number>(100);
+  const [quantityInput, setQuantityInput] = useState<string>('100');
+  const [quantityError, setQuantityError] = useState<string | null>(null);
 
   // Quick entry fields
   const [quickName, setQuickName] = useState('');
@@ -40,6 +48,7 @@ export function AddMealEntryModal({
     if (!open) return;
     setMealType(editingEntry?.mealType ?? initialMealType);
     setQuery('');
+    setQuantityError(null);
 
     if (editingEntry) {
       const matched = editingEntry.foodId
@@ -49,7 +58,7 @@ export function AddMealEntryModal({
         setMode('catalog');
         setSelectedFood(matched);
         setUnitMode(editingEntry.unitMode);
-        setQuantity(editingEntry.quantity);
+        setQuantityInput(String(editingEntry.quantity));
       } else {
         setMode('quick');
         setSelectedFood(null);
@@ -63,7 +72,7 @@ export function AddMealEntryModal({
       setMode('catalog');
       setSelectedFood(null);
       setUnitMode('grams');
-      setQuantity(100);
+      setQuantityInput('100');
       setQuickName('');
       setQuickCal(0);
       setQuickProt(0);
@@ -71,6 +80,8 @@ export function AddMealEntryModal({
       setQuickFat(0);
     }
   }, [open, initialMealType, editingEntry, foods]);
+
+  const parsedQuantity = useMemo(() => parseDecimal(quantityInput), [quantityInput]);
 
   const filteredFoods = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -81,18 +92,23 @@ export function AddMealEntryModal({
 
   const previewMacros = useMemo(() => {
     if (!selectedFood) return null;
-    return calculateScaledMacros(selectedFood, unitMode, quantity);
-  }, [selectedFood, unitMode, quantity]);
+    return calculateScaledMacros(selectedFood, unitMode, parsedQuantity);
+  }, [selectedFood, unitMode, parsedQuantity]);
 
   function handleSelectFood(food: FoodItem) {
     setSelectedFood(food);
     setUnitMode('grams');
-    setQuantity(food.servingGrams || 100);
+    setQuantityInput(String(food.servingGrams || 100));
+    setQuantityError(null);
   }
 
   async function handleSaveCatalog(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedFood || !previewMacros) return;
+    if (parsedQuantity <= 0) {
+      setQuantityError('Informe uma quantidade maior que zero.');
+      return;
+    }
 
     await db.mealEntries.put({
       id: editingEntry?.id ?? `me-${crypto.randomUUID()}`,
@@ -101,7 +117,7 @@ export function AddMealEntryModal({
       foodId: selectedFood.id,
       foodName: selectedFood.name,
       unitMode,
-      quantity: Math.max(0.1, Number(quantity) || 0),
+      quantity: parsedQuantity,
       calories: previewMacros.calories,
       protein: previewMacros.protein,
       carbs: previewMacros.carbs,
@@ -241,7 +257,10 @@ export function AddMealEntryModal({
                     onChange={(e) => {
                       const nextMode = e.target.value as 'grams' | 'servings';
                       setUnitMode(nextMode);
-                      setQuantity(nextMode === 'grams' ? selectedFood.servingGrams : 1);
+                      setQuantityInput(
+                        nextMode === 'grams' ? String(selectedFood.servingGrams) : '1'
+                      );
+                      setQuantityError(null);
                     }}
                     className="w-full px-3 py-2.5 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-sm text-[#F4F4F6]"
                   >
@@ -256,15 +275,23 @@ export function AddMealEntryModal({
                   </label>
                   <input
                     type="number"
-                    step="0.5"
-                    min={0.1}
+                    inputMode="decimal"
+                    step="any"
+                    min={0}
                     required
-                    value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
+                    value={quantityInput}
+                    onChange={(e) => {
+                      setQuantityInput(e.target.value);
+                      if (quantityError) setQuantityError(null);
+                    }}
                     className="w-full px-3 py-2.5 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-sm font-semibold text-[#F4F4F6]"
                   />
                 </div>
               </div>
+
+              {quantityError && (
+                <p className="text-xs text-red-400">{quantityError}</p>
+              )}
 
               {previewMacros && (
                 <div className="grid grid-cols-4 gap-2 p-3 rounded-xl bg-[#141418] border border-[#25252C] text-center">
@@ -322,6 +349,8 @@ export function AddMealEntryModal({
                 <label className="block text-xs text-[#F97316] mb-1">Calorias (kcal)</label>
                 <input
                   type="number"
+                  inputMode="decimal"
+                  step="any"
                   min={0}
                   required
                   value={quickCal}
@@ -333,7 +362,8 @@ export function AddMealEntryModal({
                 <label className="block text-xs text-red-400 mb-1">Proteína (g)</label>
                 <input
                   type="number"
-                  step="0.5"
+                  inputMode="decimal"
+                  step="any"
                   min={0}
                   value={quickProt}
                   onChange={(e) => setQuickProt(Number(e.target.value))}
@@ -344,7 +374,8 @@ export function AddMealEntryModal({
                 <label className="block text-xs text-sky-400 mb-1">Carboidrato (g)</label>
                 <input
                   type="number"
-                  step="0.5"
+                  inputMode="decimal"
+                  step="any"
                   min={0}
                   value={quickCarbs}
                   onChange={(e) => setQuickCarbs(Number(e.target.value))}
@@ -355,7 +386,8 @@ export function AddMealEntryModal({
                 <label className="block text-xs text-yellow-400 mb-1">Gordura (g)</label>
                 <input
                   type="number"
-                  step="0.5"
+                  inputMode="decimal"
+                  step="any"
                   min={0}
                   value={quickFat}
                   onChange={(e) => setQuickFat(Number(e.target.value))}

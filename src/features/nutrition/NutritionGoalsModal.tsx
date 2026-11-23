@@ -124,8 +124,9 @@ export function NutritionGoalsModal({ open, onClose, goal }: NutritionGoalsModal
           <label className="block text-xs text-[#9CA3AF] mb-1">Meta de água (ml)</label>
           <input
             type="number"
+            inputMode="numeric"
             min={0}
-            step={100}
+            step={1}
             value={waterMl}
             onChange={(e) => setWaterMl(Number(e.target.value))}
             className="w-full px-3 py-2.5 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-sm text-[#F4F4F6]"

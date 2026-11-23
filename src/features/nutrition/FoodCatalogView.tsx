@@ -184,6 +184,8 @@ export function FoodCatalogView({ foods }: FoodCatalogViewProps) {
               <label className="block text-xs text-[#9CA3AF] mb-1">Peso da porção (g/ml)</label>
               <input
                 type="number"
+                inputMode="decimal"
+                step="any"
                 min={1}
                 required
                 value={servingGrams}
@@ -198,6 +200,8 @@ export function FoodCatalogView({ foods }: FoodCatalogViewProps) {
               <label className="block text-xs text-[#F97316] mb-1">Calorias (kcal)</label>
               <input
                 type="number"
+                inputMode="decimal"
+                step="any"
                 min={0}
                 required
                 value={calories}
@@ -209,7 +213,8 @@ export function FoodCatalogView({ foods }: FoodCatalogViewProps) {
               <label className="block text-xs text-red-400 mb-1">Proteína (g)</label>
               <input
                 type="number"
-                step="0.1"
+                inputMode="decimal"
+                step="any"
                 min={0}
                 value={protein}
                 onChange={(e) => setProtein(Number(e.target.value))}
@@ -220,7 +225,8 @@ export function FoodCatalogView({ foods }: FoodCatalogViewProps) {
               <label className="block text-xs text-sky-400 mb-1">Carboidrato (g)</label>
               <input
                 type="number"
-                step="0.1"
+                inputMode="decimal"
+                step="any"
                 min={0}
                 value={carbs}
                 onChange={(e) => setCarbs(Number(e.target.value))}
@@ -231,7 +237,8 @@ export function FoodCatalogView({ foods }: FoodCatalogViewProps) {
               <label className="block text-xs text-yellow-400 mb-1">Gordura (g)</label>
               <input
                 type="number"
-                step="0.1"
+                inputMode="decimal"
+                step="any"
                 min={0}
                 value={fat}
                 onChange={(e) => setFat(Number(e.target.value))}

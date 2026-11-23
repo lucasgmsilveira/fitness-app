@@ -452,7 +452,7 @@ export function ActiveWorkoutView({
                             <input
                               type="number"
                               inputMode="decimal"
-                              step="0.5"
+                              step="any"
                               min={0}
                               placeholder="0"
                               value={set.weightKg ?? ''}
