@@ -19,10 +19,14 @@ app/
 ├── src/
 │   ├── components/
 │   │   ├── charts/                     # CalorieRing, TrendLineChart, MiniBarChart (SVG puro)
+│   │   ├── exercises/                  # MuscleAnatomyDiagram, ExerciseExecutionScene, ExerciseVisualGuideModal
 │   │   ├── layout/                     # AppShell, BottomNav, QuickActionSheet
 │   │   └── ui/                         # Card, Modal, ConfirmDialog, Badge, EmptyState
 │   ├── data/
-│   │   └── foodCatalog.ts              # Catálogo nutricional BR/RS (TACO, TBCA, IBGE POF)
+│   │   ├── exerciseAnimations.ts       # Rigs e keyframes vetoriais SVG (100% offline) dos exercícios
+│   │   ├── exerciseGuides.ts           # Passo a passo, respiração, postura e músculos por exercício
+│   │   ├── foodCatalog.ts              # Catálogo nutricional BR/RS (TACO, TBCA, IBGE POF)
+│   │   └── muscleAnatomy.ts            # Diagrama anatômico SVG (frente/costas) e regiões musculares
 │   ├── db/
 │   │   ├── types.ts                    # Interfaces TypeScript e constantes de domínio
 │   │   ├── database.ts                 # Instância Dexie (GymLogDB) e índices
@@ -46,6 +50,7 @@ app/
 ├── tests/
 │   ├── appearance.test.ts              # Testes de preferências visuais
 │   ├── calculations.test.ts            # Testes unitários de datas, treinos e nutrição
+│   ├── exerciseGuides.test.ts          # Testes de cobertura anatômica, animações e ausência de links externos
 │   ├── foodCatalog.test.ts             # Testes do catálogo BR/RS, busca, receitas e Open Food Facts
 │   └── backup.test.ts                  # Testes de seed, upgrade v2->v3, exportação e restauração no Dexie
 └── vite.config.ts                      # Configuração de base path + VitePWA/Workbox

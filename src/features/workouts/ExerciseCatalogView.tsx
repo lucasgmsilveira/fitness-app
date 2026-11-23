@@ -1,11 +1,14 @@
 import { useMemo, useState } from 'react';
-import { Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { db } from '../../db/database';
 import { MUSCLE_GROUPS, type Exercise, type MuscleGroup } from '../../db/types';
+import { getExerciseGuide } from '../../data/exerciseGuides';
+import { MUSCLE_DEFINITIONS } from '../../data/muscleAnatomy';
 import { Card } from '../../components/ui/Card';
 import { Modal } from '../../components/ui/Modal';
 import { Badge } from '../../components/ui/Badge';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { ExerciseVisualGuideModal } from '../../components/exercises/ExerciseVisualGuideModal';
 
 interface ExerciseCatalogViewProps {
   exercises: Exercise[];
@@ -17,6 +20,7 @@ export function ExerciseCatalogView({ exercises }: ExerciseCatalogViewProps) {
   const [editing, setEditing] = useState<Exercise | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Exercise | null>(null);
+  const [guideExercise, setGuideExercise] = useState<Exercise | null>(null);
 
   const [name, setName] = useState('');
   const [muscleGroup, setMuscleGroup] = useState<MuscleGroup>('Peito');
@@ -117,40 +121,60 @@ export function ExerciseCatalogView({ exercises }: ExerciseCatalogViewProps) {
       </div>
 
       <div className="space-y-2">
-        {filtered.map((ex) => (
-          <Card key={ex.id} className="p-3.5 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-sm font-semibold text-[#F4F4F6] truncate">{ex.name}</p>
-                <Badge>{ex.muscleGroup}</Badge>
+        {filtered.map((ex) => {
+          const primaryLabel = getExerciseGuide(ex)
+            .guide.primaryMuscles.map((id) => MUSCLE_DEFINITIONS[id].name)
+            .join(', ');
+          return (
+            <Card key={ex.id} className="p-3.5 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-sm font-semibold text-[#F4F4F6] truncate">{ex.name}</p>
+                  <Badge>{ex.muscleGroup}</Badge>
+                </div>
+                <p className="text-xs text-[#9CA3AF] mt-0.5">
+                  {ex.equipment} · Descanso padrão {ex.defaultRestSec}s
+                </p>
+                {primaryLabel && (
+                  <p className="text-[0.75rem] text-[#FDBA74]/90 mt-0.5 truncate">
+                    Foco: {primaryLabel}
+                  </p>
+                )}
+                {ex.notes && (
+                  <p className="text-[0.8125rem] text-[#6B7280] mt-1">{ex.notes}</p>
+                )}
               </div>
-              <p className="text-xs text-[#9CA3AF] mt-0.5">
-                {ex.equipment} · Descanso padrão {ex.defaultRestSec}s
-              </p>
-              {ex.notes && (
-                <p className="text-[0.8125rem] text-[#6B7280] mt-1">{ex.notes}</p>
-              )}
-            </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                type="button"
-                onClick={() => openEdit(ex)}
-                aria-label="Editar exercício"
-                className="p-2 rounded-xl text-[#9CA3AF] hover:text-white hover:bg-[#1E1E24]"
-              >
-                <Pencil className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeleteTarget(ex)}
-                aria-label="Excluir exercício"
-                className="p-2 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </Card>
-        ))}
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setGuideExercise(ex)}
+                  aria-label={`Ver guia visual de ${ex.name}`}
+                  title="Ver músculos e execução"
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-xs font-semibold text-[#F97316] hover:bg-[#272730]"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  Guia
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openEdit(ex)}
+                  aria-label="Editar exercício"
+                  className="p-2 rounded-xl text-[#9CA3AF] hover:text-white hover:bg-[#1E1E24]"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(ex)}
+                  aria-label="Excluir exercício"
+                  className="p-2 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
       <Modal
@@ -242,6 +266,12 @@ export function ExerciseCatalogView({ exercises }: ExerciseCatalogViewProps) {
         title="Excluir exercício?"
         description={`Remover "${deleteTarget?.name}" do catálogo? Treinos já salvos no histórico permanecem intactos.`}
         confirmLabel="Excluir"
+      />
+
+      <ExerciseVisualGuideModal
+        open={guideExercise !== null}
+        onClose={() => setGuideExercise(null)}
+        exercise={guideExercise}
       />
     </div>
   );

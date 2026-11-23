@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Copy, Dumbbell, Pencil, Play, Plus, Trash2 } from 'lucide-react';
+import { Copy, Dumbbell, Eye, Pencil, Play, Plus, Trash2 } from 'lucide-react';
 import { db } from '../../db/database';
 import type { Exercise, Routine, WorkoutExerciseLog, WorkoutSession } from '../../db/types';
 import { getLocalDateString } from '../../utils/date';
@@ -11,6 +11,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { RoutineEditorModal } from './RoutineEditorModal';
 import { WorkoutHistoryList } from './WorkoutHistoryList';
 import { ExerciseCatalogView } from './ExerciseCatalogView';
+import { ExerciseVisualGuideModal } from '../../components/exercises/ExerciseVisualGuideModal';
 
 type WorkoutSubTab = 'routines' | 'history' | 'exercises';
 
@@ -33,6 +34,7 @@ export function WorkoutsPage({
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null);
   const [deleteRoutineTarget, setDeleteRoutineTarget] = useState<Routine | null>(null);
+  const [guideExercise, setGuideExercise] = useState<Exercise | null>(null);
 
   const exerciseMap = useMemo(
     () => new Map(exercises.map((e) => [e.id, e])),
@@ -266,9 +268,32 @@ export function WorkoutsPage({
                         className="py-1.5 border-t border-[#22222A] space-y-0.5"
                       >
                         <div className="flex items-center justify-between gap-2 text-xs">
-                          <span className="text-[#D1D5DB] truncate font-medium">
-                            {ex?.name ?? 'Exercício'}
-                          </span>
+                          <div className="min-w-0 flex items-center gap-1.5">
+                            {ex ? (
+                              <button
+                                type="button"
+                                onClick={() => setGuideExercise(ex)}
+                                className="text-[#D1D5DB] hover:text-[#F97316] truncate font-medium text-left transition-colors"
+                              >
+                                {ex.name}
+                              </button>
+                            ) : (
+                              <span className="text-[#D1D5DB] truncate font-medium">
+                                Exercício
+                              </span>
+                            )}
+                            {ex && (
+                              <button
+                                type="button"
+                                onClick={() => setGuideExercise(ex)}
+                                aria-label={`Ver guia visual de ${ex.name}`}
+                                title="Ver músculos e execução"
+                                className="p-1 rounded-lg text-[#9CA3AF] hover:text-[#F97316] hover:bg-[#1E1E24] shrink-0 transition-colors"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
                           <span className="text-[#9CA3AF] shrink-0 tabular-nums">
                             {item.targetSets}×{item.targetReps}
                             {prev ? ` · Últ: ${prev.summary.split(' · ')[0]}` : ''}
@@ -317,6 +342,12 @@ export function WorkoutsPage({
         title="Excluir rotina?"
         description={`A rotina "${deleteRoutineTarget?.name}" será removida. Seu histórico de treinos já realizados não será afetado.`}
         confirmLabel="Excluir"
+      />
+
+      <ExerciseVisualGuideModal
+        open={guideExercise !== null}
+        onClose={() => setGuideExercise(null)}
+        exercise={guideExercise}
       />
     </AppShell>
   );

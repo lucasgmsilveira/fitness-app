@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Eye,
   Layers,
   Minimize2,
   Plus,
@@ -25,6 +26,10 @@ import { RestTimerBar } from './RestTimerBar';
 import { ExercisePickerModal } from './ExercisePickerModal';
 import { WorkoutOverviewModal } from './WorkoutOverviewModal';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import {
+  ExerciseVisualGuideModal,
+  type GuideModalTab,
+} from '../../components/exercises/ExerciseVisualGuideModal';
 
 interface ActiveWorkoutViewProps {
   session: WorkoutSession;
@@ -75,6 +80,10 @@ export function ActiveWorkoutView({
   const [pickerMode, setPickerMode] = useState<'normal' | 'superset' | null>(null);
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
+  const [guideTarget, setGuideTarget] = useState<{
+    exercise: Exercise;
+    tab: GuideModalTab;
+  } | null>(null);
 
   // Rest timer state
   const [restOpen, setRestOpen] = useState(false);
@@ -351,72 +360,115 @@ export function ActiveWorkoutView({
             completedSessions,
             exLog.exerciseId
           );
+          const guideExercise: Exercise = meta ?? {
+            id: exLog.exerciseId,
+            name: exLog.exerciseName,
+            muscleGroup: 'Outro',
+            equipment: exLog.equipment,
+            defaultRestSec: 90,
+            notes: exLog.notes,
+            createdAt: session.startedAt,
+          };
 
           return (
             <div
               key={exLog.id}
               className={`rounded-2xl bg-[#16161A] border border-[#25252C] border-l-4 ${borderAccent} overflow-hidden`}
             >
-              <button
-                type="button"
-                onClick={() => setExpandedId(isExpanded ? null : exLog.id)}
-                className="w-full px-4 py-3.5 flex items-center justify-between gap-3 text-left"
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-[#F4F4F6] truncate">
-                      {exLog.exerciseName}
-                    </p>
-                    {exLog.supersetGroup && (
-                      <span className="text-[0.75rem] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">
-                        {exLog.supersetGroup}
-                      </span>
-                    )}
-                  </div>
+              <div className="px-4 py-3.5 flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(isExpanded ? null : exLog.id)}
+                  className="flex-1 min-w-0 flex items-center justify-between gap-3 text-left"
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-[#F4F4F6] truncate">
+                        {exLog.exerciseName}
+                      </p>
+                      {exLog.supersetGroup && (
+                        <span className="text-[0.75rem] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                          {exLog.supersetGroup}
+                        </span>
+                      )}
+                    </div>
 
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-[#9CA3AF]">{exLog.equipment}</span>
-                    <span className="text-[#3F3F46]">|</span>
-                    <div className="flex items-center gap-1">
-                      {exLog.sets.map((s) => (
-                        <span
-                          key={s.id}
-                          className={`w-2.5 h-2.5 rounded-full border ${
-                            s.completed
-                              ? 'border-[#84CC16] bg-[#84CC16]/30'
-                              : s.weightKg || s.reps
-                                ? 'border-[#F97316]'
-                                : 'border-[#4B5563]'
-                          }`}
-                        />
-                      ))}
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-[#9CA3AF]">{exLog.equipment}</span>
+                      <span className="text-[#3F3F46]">|</span>
+                      <div className="flex items-center gap-1">
+                        {exLog.sets.map((s) => (
+                          <span
+                            key={s.id}
+                            className={`w-2.5 h-2.5 rounded-full border ${
+                              s.completed
+                                ? 'border-[#84CC16] bg-[#84CC16]/30'
+                                : s.weightKg || s.reps
+                                  ? 'border-[#F97316]'
+                                  : 'border-[#4B5563]'
+                            }`}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {isExpanded ? (
-                  <ChevronUp className="w-5 h-5 text-[#9CA3AF] shrink-0" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-[#9CA3AF] shrink-0" />
-                )}
-              </button>
+                  {isExpanded ? (
+                    <ChevronUp className="w-5 h-5 text-[#9CA3AF] shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-[#9CA3AF] shrink-0" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setGuideTarget({ exercise: guideExercise, tab: 'execution' })
+                  }
+                  aria-label={`Ver guia visual de ${exLog.exerciseName}`}
+                  title="Ver execução e músculos trabalhados"
+                  className="p-2 rounded-xl bg-[#1E1E24] border border-[#2A2A33] text-[#9CA3AF] hover:text-[#F97316] hover:border-[#F97316]/50 shrink-0 transition-colors"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+              </div>
 
               {isExpanded && (
                 <div className="px-3.5 pb-4 pt-1 border-t border-[#22222A] space-y-3">
-                  <div className="flex items-center justify-between gap-2 text-[0.8125rem]">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[0.8125rem]">
                     <span className="text-[#9CA3AF] truncate">
                       {previous
                         ? `Anterior (${formatDateBr(previous.date)}): ${previous.summary}`
                         : 'Sem histórico anterior para este exercício'}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => removeExercise(exLog.id)}
-                      className="text-red-400/80 hover:text-red-400 shrink-0 inline-flex items-center gap-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Remover
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setGuideTarget({ exercise: guideExercise, tab: 'execution' })
+                        }
+                        className="px-2 py-0.5 rounded-lg bg-[#1E1E24] border border-[#2C2C35] text-[0.75rem] font-medium text-[#D1D5DB] hover:text-[#F97316]"
+                      >
+                        Execução
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setGuideTarget({ exercise: guideExercise, tab: 'muscles' })
+                        }
+                        className="px-2 py-0.5 rounded-lg bg-[#1E1E24] border border-[#2C2C35] text-[0.75rem] font-medium text-[#D1D5DB] hover:text-[#38BDF8]"
+                      >
+                        Músculos
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeExercise(exLog.id)}
+                        className="text-red-400/80 hover:text-red-400 inline-flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Remover
+                      </button>
+                    </div>
                   </div>
 
                   {/* Cabeçalho da tabela de séries */}
@@ -663,6 +715,13 @@ export function ActiveWorkoutView({
         title="Descartar treino atual?"
         description="Todas as séries registradas nesta sessão em andamento serão removidas permanentemente."
         confirmLabel="Descartar"
+      />
+
+      <ExerciseVisualGuideModal
+        open={guideTarget !== null}
+        onClose={() => setGuideTarget(null)}
+        exercise={guideTarget?.exercise ?? null}
+        initialTab={guideTarget?.tab}
       />
     </div>
   );

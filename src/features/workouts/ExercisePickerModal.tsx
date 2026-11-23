@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Eye, Plus, Search } from 'lucide-react';
 import { db } from '../../db/database';
 import { MUSCLE_GROUPS, type Exercise, type MuscleGroup } from '../../db/types';
 import { Modal } from '../../components/ui/Modal';
+import { ExerciseVisualGuideModal } from '../../components/exercises/ExerciseVisualGuideModal';
 
 interface ExercisePickerModalProps {
   open: boolean;
@@ -22,6 +23,7 @@ export function ExercisePickerModal({
   const [query, setQuery] = useState('');
   const [groupFilter, setGroupFilter] = useState<MuscleGroup | 'Todos'>('Todos');
   const [showCreate, setShowCreate] = useState(false);
+  const [guideExercise, setGuideExercise] = useState<Exercise | null>(null);
 
   const [newName, setNewName] = useState('');
   const [newGroup, setNewGroup] = useState<MuscleGroup>('Peito');
@@ -104,23 +106,37 @@ export function ExercisePickerModal({
 
           <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
             {filtered.map((ex) => (
-              <button
+              <div
                 key={ex.id}
-                type="button"
-                onClick={() => {
-                  onSelect(ex);
-                  onClose();
-                }}
-                className="w-full text-left px-3.5 py-2.5 rounded-xl bg-[#1E1E24] hover:bg-[#272730] border border-[#2A2A33] flex items-center justify-between gap-2 transition-colors"
+                className="w-full rounded-xl bg-[#1E1E24] hover:bg-[#272730] border border-[#2A2A33] flex items-center gap-1.5 pr-2 transition-colors"
               >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-[#F4F4F6] truncate">{ex.name}</p>
-                  <p className="text-[0.8125rem] text-[#9CA3AF]">
-                    {ex.muscleGroup} · {ex.equipment} · {ex.defaultRestSec}s
-                  </p>
-                </div>
-                <Plus className="w-4 h-4 text-[#84CC16] shrink-0" />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelect(ex);
+                    onClose();
+                  }}
+                  className="flex-1 min-w-0 text-left px-3.5 py-2.5 flex items-center justify-between gap-2"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-[#F4F4F6] truncate">{ex.name}</p>
+                    <p className="text-[0.8125rem] text-[#9CA3AF]">
+                      {ex.muscleGroup} · {ex.equipment} · {ex.defaultRestSec}s
+                    </p>
+                  </div>
+                  <Plus className="w-4 h-4 text-[#84CC16] shrink-0" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setGuideExercise(ex)}
+                  aria-label={`Pré-visualizar guia de ${ex.name}`}
+                  title="Ver músculos e execução"
+                  className="p-2 rounded-lg text-[#9CA3AF] hover:text-[#F97316] hover:bg-[#16161A] shrink-0 transition-colors"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+              </div>
             ))}
             {filtered.length === 0 && (
               <p className="text-xs text-[#9CA3AF] text-center py-6">
@@ -195,6 +211,12 @@ export function ExercisePickerModal({
           </div>
         </form>
       )}
+
+      <ExerciseVisualGuideModal
+        open={guideExercise !== null}
+        onClose={() => setGuideExercise(null)}
+        exercise={guideExercise}
+      />
     </Modal>
   );
 }
