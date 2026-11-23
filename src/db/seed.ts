@@ -1,8 +1,9 @@
 import type { GymLogDB } from './database';
 import type { Exercise, FoodItem, NutritionGoal, Routine } from './types';
+import { INITIAL_FOODS, SEED_TIMESTAMP_V1 } from '../data/foodCatalog';
 
-export const SEED_TIMESTAMP_V1 = '2026-01-01T12:00:00.000Z';
-export const CURRENT_SEED_VERSION = '2';
+export { INITIAL_FOODS, SEED_TIMESTAMP_V1 };
+export const CURRENT_SEED_VERSION = '3';
 
 export const INITIAL_EXERCISES: Exercise[] = [
   // Core e estabilidade
@@ -122,29 +123,6 @@ export const INITIAL_ROUTINES: Routine[] = [
   },
 ];
 
-export const INITIAL_FOODS: FoodItem[] = [
-  { id: 'fd-frango', name: 'Peito de Frango Grelhado', servingLabel: '100g', servingGrams: 100, calories: 159, protein: 32, carbs: 0, fat: 2.5, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-arroz', name: 'Arroz Branco Cozido', servingLabel: '100g', servingGrams: 100, calories: 128, protein: 2.5, carbs: 28, fat: 0.2, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-feijao', name: 'Feijão Carioca Cozido', servingLabel: '100g', servingGrams: 100, calories: 76, protein: 4.8, carbs: 13.6, fat: 0.5, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-ovo', name: 'Ovo de Galinha Inteiro', servingLabel: '1 unidade (50g)', servingGrams: 50, calories: 74, protein: 6.3, carbs: 0.4, fat: 5.0, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-aveia', name: 'Aveia em Flocos', servingLabel: '30g (2 col. sopa)', servingGrams: 30, calories: 117, protein: 4.2, carbs: 20, fat: 2.1, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-banana', name: 'Banana Prata', servingLabel: '1 unidade média (70g)', servingGrams: 70, calories: 69, protein: 0.9, carbs: 18, fat: 0.1, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-batata-doce', name: 'Batata Doce Cozida', servingLabel: '100g', servingGrams: 100, calories: 77, protein: 0.6, carbs: 18.4, fat: 0.1, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-patinho', name: 'Patinho Moído Grelhado', servingLabel: '100g', servingGrams: 100, calories: 219, protein: 35.9, carbs: 0, fat: 7.3, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-tilapia', name: 'Filé de Tilápia Grelhado', servingLabel: '100g', servingGrams: 100, calories: 128, protein: 26, carbs: 0, fat: 2.7, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-pao-integral', name: 'Pão de Forma Integral', servingLabel: '2 fatias (50g)', servingGrams: 50, calories: 126, protein: 5.0, carbs: 22, fat: 1.8, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-azeite', name: 'Azeite de Oliva Extra Virgem', servingLabel: '1 col. sopa (13g)', servingGrams: 13, calories: 115, protein: 0, carbs: 0, fat: 13, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-whey', name: 'Whey Protein Concentrado', servingLabel: '1 scoop (30g)', servingGrams: 30, calories: 120, protein: 24, carbs: 3.0, fat: 1.5, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-iogurte', name: 'Iogurte Natural Integral', servingLabel: '1 pote (170g)', servingGrams: 170, calories: 104, protein: 6.0, carbs: 7.5, fat: 5.5, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-leite-desnatado', name: 'Leite Desnatado', servingLabel: '200ml', servingGrams: 200, calories: 68, protein: 6.6, carbs: 10, fat: 0.2, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-pasta-amendoim', name: 'Pasta de Amendoim Integral', servingLabel: '1 col. sopa (15g)', servingGrams: 15, calories: 90, protein: 4.0, carbs: 2.5, fat: 7.5, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-queijo-minas', name: 'Queijo Minas Frescal', servingLabel: '30g (1 fatia)', servingGrams: 30, calories: 79, protein: 5.2, carbs: 1.0, fat: 6.1, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-brocolis', name: 'Brócolis Cozido', servingLabel: '100g', servingGrams: 100, calories: 25, protein: 2.1, carbs: 4.4, fat: 0.5, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-maca', name: 'Maçã', servingLabel: '1 unidade média (130g)', servingGrams: 130, calories: 72, protein: 0.4, carbs: 19, fat: 0.2, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-tapioca', name: 'Goma de Tapioca Hidratada', servingLabel: '50g (3 col. sopa)', servingGrams: 50, calories: 120, protein: 0, carbs: 30, fat: 0, createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'fd-salmao', name: 'Salmão Grelhado', servingLabel: '100g', servingGrams: 100, calories: 206, protein: 22, carbs: 0, fat: 12.4, createdAt: SEED_TIMESTAMP_V1 },
-];
-
 export const INITIAL_GOAL: NutritionGoal = {
   id: 'default',
   calories: 2200,
@@ -161,6 +139,39 @@ async function upsertMissingCatalogExercises(db: GymLogDB): Promise<void> {
   if (missing.length > 0) {
     await db.exercises.bulkPut(missing);
   }
+}
+
+async function upsertCatalogFoods(db: GymLogDB): Promise<{ added: number; enriched: number }> {
+  const existingFoods = await db.foods.toArray();
+  const existingById = new Map(existingFoods.map((item) => [item.id, item]));
+  const toPut: FoodItem[] = [];
+  let added = 0;
+  let enriched = 0;
+
+  for (const catalogFood of INITIAL_FOODS) {
+    const existing = existingById.get(catalogFood.id);
+    if (!existing) {
+      toPut.push(catalogFood);
+      added += 1;
+      continue;
+    }
+
+    const isUntouchedSeedItem =
+      !existing.isCustom &&
+      existing.createdAt === SEED_TIMESTAMP_V1 &&
+      (!existing.category || !existing.source);
+
+    if (isUntouchedSeedItem) {
+      toPut.push(catalogFood);
+      enriched += 1;
+    }
+  }
+
+  if (toPut.length > 0) {
+    await db.foods.bulkPut(toPut);
+  }
+
+  return { added, enriched };
 }
 
 export async function ensureInitialSeed(db: GymLogDB): Promise<void> {
@@ -194,8 +205,9 @@ export async function ensureInitialSeed(db: GymLogDB): Promise<void> {
           await db.nutritionGoals.put(INITIAL_GOAL);
         }
       } else {
-        // Atualização automática de catálogos novos em bancos v1 existentes sem apagar edições
+        // Atualização automática de catálogos novos em bancos v1/v2 existentes sem apagar edições
         await upsertMissingCatalogExercises(db);
+        await upsertCatalogFoods(db);
         const currentRoutines = await db.routines.toArray();
         const isUntouchedV1Default =
           currentRoutines.length === 2 &&
@@ -214,6 +226,17 @@ export async function ensureInitialSeed(db: GymLogDB): Promise<void> {
       await db.appMeta.put({ key: 'seedVersion', value: CURRENT_SEED_VERSION });
     }
   );
+}
+
+export async function syncFoodCatalog(
+  db: GymLogDB
+): Promise<{ added: number; enriched: number }> {
+  return db.transaction('rw', [db.foods, db.appMeta], async () => {
+    const result = await upsertCatalogFoods(db);
+    await db.appMeta.put({ key: 'seeded', value: 'true' });
+    await db.appMeta.put({ key: 'seedVersion', value: CURRENT_SEED_VERSION });
+    return result;
+  });
 }
 
 export async function applyStarterRoutinesABCD(db: GymLogDB): Promise<void> {

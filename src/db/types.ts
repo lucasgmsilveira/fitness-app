@@ -98,15 +98,97 @@ export interface WorkoutSession {
   notes?: string;
 }
 
+export type FoodCategory =
+  | 'Carnes e Churrasco'
+  | 'Aves, Peixes e Ovos'
+  | 'Grãos, Massas e Raízes'
+  | 'Pratos Gaúchos e Caseiros'
+  | 'Pães, Cucas e Cereais'
+  | 'Laticínios e Pastas'
+  | 'Frutas'
+  | 'Legumes e Verduras'
+  | 'Gorduras e Oleaginosas'
+  | 'Bebidas e Chimarrão'
+  | 'Suplementos e Outros';
+
+export const FOOD_CATEGORIES: FoodCategory[] = [
+  'Carnes e Churrasco',
+  'Aves, Peixes e Ovos',
+  'Grãos, Massas e Raízes',
+  'Pratos Gaúchos e Caseiros',
+  'Pães, Cucas e Cereais',
+  'Laticínios e Pastas',
+  'Frutas',
+  'Legumes e Verduras',
+  'Gorduras e Oleaginosas',
+  'Bebidas e Chimarrão',
+  'Suplementos e Outros',
+];
+
+export type FoodPreparation = 'cru' | 'cozido' | 'grelhado' | 'assado' | 'frito' | 'pronto';
+
+export const FOOD_PREPARATION_LABELS: Record<FoodPreparation, string> = {
+  cru: 'Cru',
+  cozido: 'Cozido',
+  grelhado: 'Grelhado',
+  assado: 'Assado',
+  frito: 'Frito',
+  pronto: 'Pronto',
+};
+
+export type FoodSource =
+  | 'TBCA 7.3'
+  | 'TACO 4ª ed.'
+  | 'IBGE POF'
+  | 'USDA FDC'
+  | 'Open Food Facts'
+  | 'Rótulo / Fabricante'
+  | 'Receita Própria';
+
+export const FOOD_SOURCES: FoodSource[] = [
+  'TACO 4ª ed.',
+  'TBCA 7.3',
+  'IBGE POF',
+  'USDA FDC',
+  'Open Food Facts',
+  'Rótulo / Fabricante',
+  'Receita Própria',
+];
+
+export interface RecipeIngredient {
+  foodId?: string;
+  foodName: string;
+  grams: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber?: number | null;
+}
+
 export interface FoodItem {
   id: string;
   name: string;
   servingLabel: string;
   servingGrams: number;
+  unit?: 'g' | 'ml';
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number | null;
+  category?: FoodCategory;
+  preparation?: FoodPreparation;
+  aliases?: string[];
+  isRegionalRS?: boolean;
+  source?: FoodSource | string;
+  sourceId?: string;
+  sourceUpdatedAt?: string;
+  carbBasis?: 'available' | 'total';
+  barcode?: string;
+  isRecipe?: boolean;
+  recipeYieldGrams?: number;
+  recipeIngredients?: RecipeIngredient[];
   isCustom?: boolean;
   createdAt: string;
 }
@@ -123,6 +205,7 @@ export interface MealEntry {
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number | null;
   createdAt: string;
 }
 

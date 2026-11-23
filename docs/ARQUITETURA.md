@@ -21,27 +21,33 @@ app/
 │   │   ├── charts/                     # CalorieRing, TrendLineChart, MiniBarChart (SVG puro)
 │   │   ├── layout/                     # AppShell, BottomNav, QuickActionSheet
 │   │   └── ui/                         # Card, Modal, ConfirmDialog, Badge, EmptyState
+│   ├── data/
+│   │   └── foodCatalog.ts              # Catálogo nutricional BR/RS (TACO, TBCA, IBGE POF)
 │   ├── db/
 │   │   ├── types.ts                    # Interfaces TypeScript e constantes de domínio
 │   │   ├── database.ts                 # Instância Dexie (GymLogDB) e índices
-│   │   ├── seed.ts                     # Catálogo inicial genérico e resetDatabase()
+│   │   ├── seed.ts                     # Seed inicial (CURRENT_SEED_VERSION='3'), upgrade e resetDatabase()
 │   │   └── backup.ts                   # Exportação, validação e restauração atômica JSON
 │   ├── features/
 │   │   ├── dashboard/DashboardPage.tsx # Painel inicial (calorias, macros, PRs, gráficos)
-│   │   ├── nutrition/                  # Diário alimentar, metas, catálogo de alimentos
+│   │   ├── nutrition/                  # Diário alimentar, metas, catálogo, receitas e Open Food Facts
 │   │   ├── settings/                   # Aparência, backup JSON, medidas corporais, check-in
 │   │   └── workouts/                   # Rotinas A/B/C/D, treino ativo, descanso, histórico
 │   ├── utils/
 │   │   ├── appearance.ts               # Preferências visuais (fonte, destaque, contraste, densidade)
 │   │   ├── date.ts                     # Datas sempre no fuso local (YYYY-MM-DD)
-│   │   ├── nutritionMath.ts            # Escala de macros por gramas/porções e somatórios
+│   │   ├── foodSearch.ts               # Busca sem acentos, sinônimos regionais e filtros
+│   │   ├── nutritionMath.ts            # Escala de macros/fibras, base 100g e receitas próprias
+│   │   ├── openFoodFacts.ts            # Consulta opcional por código de barras EAN (Open Food Facts)
 │   │   └── workoutStats.ts             # Volume, PRs, frequência semanal e progressão
 │   ├── App.tsx                         # Orquestração de abas, useLiveQuery e modais rápidos
 │   ├── main.tsx                        # Ponto de entrada + registerSW({ immediate: true })
 │   └── index.css                       # Tailwind CSS v4 + tokens de tema escuro
 ├── tests/
+│   ├── appearance.test.ts              # Testes de preferências visuais
 │   ├── calculations.test.ts            # Testes unitários de datas, treinos e nutrição
-│   └── backup.test.ts                  # Testes de seed, exportação e restauração no Dexie
+│   ├── foodCatalog.test.ts             # Testes do catálogo BR/RS, busca, receitas e Open Food Facts
+│   └── backup.test.ts                  # Testes de seed, upgrade v2->v3, exportação e restauração no Dexie
 └── vite.config.ts                      # Configuração de base path + VitePWA/Workbox
 ```
 
@@ -54,8 +60,8 @@ Definido em [`src/db/database.ts`](../src/db/database.ts) (`GymLogDB`, versão `
 | `exercises` | `id, name, muscleGroup` | Catálogo de exercícios (padrão + personalizados) |
 | `routines` | `id, order, name` | Fichas de treino A/B/C/D editáveis |
 | `workoutSessions` | `id, status, date, startedAt, routineId` | Sessões ativas (`status: 'active'`) e concluídas (`completed`) |
-| `foods` | `id, name` | Catálogo de alimentos com valores por porção |
-| `mealEntries` | `id, date, mealType, [date+mealType]` | Itens consumidos no diário alimentar por data |
+| `foods` | `id, name` | Catálogo de alimentos e receitas próprias (com metadados opcionais: `category`, `preparation`, `source`, `fiber`, `isRegionalRS`, `aliases`, `recipeIngredients`) |
+| `mealEntries` | `id, date, mealType, [date+mealType]` | Itens consumidos no diário alimentar por data (inclui `fiber` opcional) |
 | `nutritionGoals` | `id` (`'default'`) | Metas diárias de kcal, macros e água |
 | `dailyCheckins` | `date` (`YYYY-MM-DD`) | Peso, medidas corporais, água e nota lombar (0–10) |
 | `appMeta` | `key` | Metadados internos (`seeded`, `seedVersion`, `lastBackupAt`, `lastRestoreAt`) |

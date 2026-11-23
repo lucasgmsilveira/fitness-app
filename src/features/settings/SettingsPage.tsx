@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Dumbbell, RotateCcw, Smartphone } from 'lucide-react';
+import { Dumbbell, RotateCcw, Smartphone, Utensils } from 'lucide-react';
 import { db } from '../../db/database';
-import { applyStarterRoutinesABCD, resetDatabase } from '../../db/seed';
+import { applyStarterRoutinesABCD, resetDatabase, syncFoodCatalog } from '../../db/seed';
 import type { DailyCheckin, WorkoutSession } from '../../db/types';
 import { AppShell } from '../../components/layout/AppShell';
 import { Card } from '../../components/ui/Card';
@@ -33,6 +33,7 @@ export function SettingsPage({
 }: SettingsPageProps) {
   const [resetMode, setResetMode] = useState<'seed' | 'empty' | null>(null);
   const [applyAbcdOpen, setApplyAbcdOpen] = useState(false);
+  const [foodSyncMsg, setFoodSyncMsg] = useState<string | null>(null);
 
   const isStandalone =
     typeof window !== 'undefined' &&
@@ -49,6 +50,15 @@ export function SettingsPage({
   async function handleApplyAbcd() {
     await applyStarterRoutinesABCD(db);
     setApplyAbcdOpen(false);
+  }
+
+  async function handleSyncFoodCatalog() {
+    const res = await syncFoodCatalog(db);
+    setFoodSyncMsg(
+      res.added === 0 && res.enriched === 0
+        ? 'Catálogo de alimentos BR/RS já está atualizado.'
+        : `Catálogo atualizado: ${res.added} novos alimentos adicionados e ${res.enriched} atualizados.`
+    );
   }
 
   return (
@@ -106,6 +116,17 @@ export function SettingsPage({
           <Dumbbell className="w-4 h-4" />
           Carregar rotinas A/B/C/D (mantém histórico)
         </button>
+        <button
+          type="button"
+          onClick={() => void handleSyncFoodCatalog()}
+          className="w-full py-2.5 px-3 rounded-xl bg-[#1E1E24] border border-[#2C2C35] text-xs font-semibold text-[#F97316] hover:border-[#F97316]/50 inline-flex items-center justify-center gap-2"
+        >
+          <Utensils className="w-4 h-4" />
+          Atualizar catálogo de alimentos BR/RS (mantém dados)
+        </button>
+        {foodSyncMsg && (
+          <p className="text-xs text-[#84CC16] text-center">{foodSyncMsg}</p>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <button
             type="button"

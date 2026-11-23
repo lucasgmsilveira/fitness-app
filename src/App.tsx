@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db/database';
 import { ensureInitialSeed, INITIAL_GOAL } from './db/seed';
@@ -40,6 +40,22 @@ export function App() {
   const goal = goals[0] ?? INITIAL_GOAL;
   const activeSession = sessions.find((s) => s.status === 'active');
   const completedSessions = sessions.filter((s) => s.status === 'completed');
+
+  const recentFoodIds = useMemo(() => {
+    const sorted = [...mealEntries]
+      .filter((e) => Boolean(e.foodId))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const seen = new Set<string>();
+    const ids: string[] = [];
+    for (const entry of sorted) {
+      if (entry.foodId && !seen.has(entry.foodId)) {
+        seen.add(entry.foodId);
+        ids.push(entry.foodId);
+        if (ids.length >= 6) break;
+      }
+    }
+    return ids;
+  }, [mealEntries]);
 
   function handleQuickAction(action: QuickActionType) {
     if (action === 'workout') {
@@ -158,6 +174,7 @@ export function App() {
         date={getLocalDateString()}
         initialMealType={quickMealModalMeal ?? 'almoco'}
         foods={foods}
+        recentFoodIds={recentFoodIds}
       />
 
       <Modal

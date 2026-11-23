@@ -6,6 +6,7 @@ import {
   CURRENT_SEED_VERSION,
   ensureInitialSeed,
   INITIAL_EXERCISES,
+  INITIAL_FOODS,
   SEED_TIMESTAMP_V1,
 } from '../src/db/seed';
 import {
@@ -103,6 +104,69 @@ describe('Seed A/B/C/D, exportação e restauração JSON no IndexedDB', () => {
     await applyStarterRoutinesABCD(testDb);
     expect(await testDb.routines.count()).toBe(4);
     expect(await testDb.workoutSessions.count()).toBe(1);
+  });
+
+  it('atualiza catálogo de alimentos v2 para v3 preservando itens customizados e editados pelo usuário', async () => {
+    await testDb.appMeta.put({ key: 'seeded', value: 'true' });
+    await testDb.appMeta.put({ key: 'seedVersion', value: '2' });
+
+    await testDb.foods.bulkPut([
+      // Item padrão v2 intocado (sem categoria/fonte) -> deve ser enriquecido
+      {
+        id: 'fd-frango',
+        name: 'Peito de Frango Grelhado',
+        servingLabel: '100g',
+        servingGrams: 100,
+        calories: 159,
+        protein: 32,
+        carbs: 0,
+        fat: 2.5,
+        createdAt: SEED_TIMESTAMP_V1,
+      },
+      // Item padrão v2 editado pelo usuário (isCustom: true) -> deve ser preservado
+      {
+        id: 'fd-arroz',
+        name: 'Meu Arroz Especial',
+        servingLabel: '150g',
+        servingGrams: 150,
+        calories: 200,
+        protein: 4,
+        carbs: 44,
+        fat: 0.5,
+        isCustom: true,
+        createdAt: SEED_TIMESTAMP_V1,
+      },
+      // Alimento customizado criado pelo usuário -> deve ser preservado
+      {
+        id: 'fd-custom-1',
+        name: 'Xis da Esquina',
+        servingLabel: '1 unidade (400g)',
+        servingGrams: 400,
+        calories: 980,
+        protein: 45,
+        carbs: 80,
+        fat: 52,
+        isCustom: true,
+        createdAt: '2026-11-22T20:00:00.000Z',
+      },
+    ]);
+
+    await ensureInitialSeed(testDb);
+
+    expect(await testDb.foods.count()).toBe(INITIAL_FOODS.length + 1);
+    const enrichedFrango = await testDb.foods.get('fd-frango');
+    expect(enrichedFrango?.category).toBe('Aves, Peixes e Ovos');
+    expect(enrichedFrango?.source).toBe('TACO 4ª ed.');
+
+    const preservedArroz = await testDb.foods.get('fd-arroz');
+    expect(preservedArroz?.name).toBe('Meu Arroz Especial');
+    expect(preservedArroz?.calories).toBe(200);
+
+    const preservedCustom = await testDb.foods.get('fd-custom-1');
+    expect(preservedCustom?.name).toBe('Xis da Esquina');
+
+    const cacetinho = await testDb.foods.get('fd-cacetinho');
+    expect(cacetinho?.isRegionalRS).toBe(true);
   });
 
   it('exporta, valida e restaura dados substituindo registros anteriores atomicamente', async () => {

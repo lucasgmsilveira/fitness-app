@@ -66,6 +66,22 @@ export function NutritionPage({
     return mealEntries.filter((e) => e.date === prevDate);
   }, [mealEntries, selectedDate]);
 
+  const recentFoodIds = useMemo(() => {
+    const sorted = [...mealEntries]
+      .filter((e) => Boolean(e.foodId))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const seen = new Set<string>();
+    const ids: string[] = [];
+    for (const entry of sorted) {
+      if (entry.foodId && !seen.has(entry.foodId)) {
+        seen.add(entry.foodId);
+        ids.push(entry.foodId);
+        if (ids.length >= 6) break;
+      }
+    }
+    return ids;
+  }, [mealEntries]);
+
   async function addWater(deltaMl: number) {
     const nextWater = Math.max(0, waterMl + deltaMl);
     await db.dailyCheckins.put({
@@ -348,6 +364,7 @@ export function NutritionPage({
         initialMealType={addModalMeal ?? 'almoco'}
         foods={foods}
         editingEntry={editingEntry}
+        recentFoodIds={recentFoodIds}
       />
     </AppShell>
   );
