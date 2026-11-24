@@ -88,34 +88,23 @@ function validateFrontPose(pose: FrontPose, prefix: string) {
   expect(pose.head.y, `${prefix}.head.y >= 16 (sem corte no topo)`).toBeGreaterThanOrEqual(16);
 }
 
-function sideBoneLengths(pose: SidePose) {
-  return {
-    torso: dist(pose.shoulder, pose.hip),
-    nearThigh: dist(pose.hip, pose.nearKnee),
-    nearShin: dist(pose.nearKnee, pose.nearFoot),
-    farThigh: dist(pose.hip, pose.farKnee),
-    farShin: dist(pose.farKnee, pose.farFoot),
-    nearUpperArm: dist(pose.shoulder, pose.nearElbow),
-    nearForearm: dist(pose.nearElbow, pose.nearHand),
-    farUpperArm: dist(pose.shoulder, pose.farElbow),
-    farForearm: dist(pose.farElbow, pose.farHand),
-  };
-}
-
-function frontBoneLengths(pose: FrontPose) {
-  const shoulderMid = midPoint(pose.leftShoulder, pose.rightShoulder);
-  const hipMid = midPoint(pose.leftHip, pose.rightHip);
-  return {
-    torso: dist(shoulderMid, hipMid),
-    leftThigh: dist(pose.leftHip, pose.leftKnee),
-    leftShin: dist(pose.leftKnee, pose.leftFoot),
-    rightThigh: dist(pose.rightHip, pose.rightKnee),
-    rightShin: dist(pose.rightKnee, pose.rightFoot),
-    leftUpperArm: dist(pose.leftShoulder, pose.leftElbow),
-    leftForearm: dist(pose.leftElbow, pose.leftHand),
-    rightUpperArm: dist(pose.rightShoulder, pose.rightElbow),
-    rightForearm: dist(pose.rightElbow, pose.rightHand),
-  };
+// A limb pointing towards the viewer shortens in projection. The other
+// camera supplies its missing depth (height for the overhead view).
+function projectedLengths(side: SidePose, front: FrontPose, overhead: boolean) {
+  const lengths: number[] = [];
+  for (const [profile, face] of [['near', 'right'], ['far', 'left']] as const) {
+    const segments = [
+      [side.shoulder, side[`${profile}Elbow`], front[`${face}Shoulder`], front[`${face}Elbow`]],
+      [side[`${profile}Elbow`], side[`${profile}Hand`], front[`${face}Elbow`], front[`${face}Hand`]],
+      [side.hip, side[`${profile}Knee`], front[`${face}Hip`], front[`${face}Knee`]],
+      [side[`${profile}Knee`], side[`${profile}Foot`], front[`${face}Knee`], front[`${face}Foot`]],
+    ];
+    for (const [a, b, c, d] of segments) {
+      lengths.push(Math.hypot(dist(a, b), d.x - c.x));
+      lengths.push(Math.hypot(dist(c, d), overhead ? b.y - a.y : b.x - a.x));
+    }
+  }
+  return lengths;
 }
 
 function assertSegmentStability(
@@ -309,18 +298,31 @@ describe('Guias visuais de músculos e execução de exercícios (100% offline)'
     for (const ex of INITIAL_EXERCISES) {
       const anim = EXERCISE_ANIMATIONS[ex.id];
 
-      const s0 = sideBoneLengths(anim.side.start);
-      const s1 = sideBoneLengths(anim.side.end);
-      for (const seg of Object.keys(s0) as (keyof typeof s0)[]) {
-        assertSegmentStability(s0[seg], s1[seg], `${ex.id}.side.${seg}`, 0.4);
-      }
+      const overhead = anim.front.projection === 'top';
+      const start = projectedLengths(anim.side.start, anim.front.start, overhead);
+      const end = projectedLengths(anim.side.end, anim.front.end, overhead);
+      start.forEach((length, i) => assertSegmentStability(length, end[i], ex.id + ' segmento ' + i));
 
-      const f0 = frontBoneLengths(anim.front.start);
-      const f1 = frontBoneLengths(anim.front.end);
-      for (const seg of Object.keys(f0) as (keyof typeof f0)[]) {
-        assertSegmentStability(f0[seg], f1[seg], `${ex.id}.front.${seg}`, 0.4);
+    }
+  });
+
+  it('mantém as trajetórias visíveis também nas fases intermediárias', () => {
+    for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+      for (const id of ['ex-crucifixo-maquina', 'ex-voador-invertido']) {
+        const { start, mid, end } = EXERCISE_ANIMATIONS[id].front;
+        const pose = interpolateFrontPose(start, mid, end, t);
+        expect(Math.abs(pose.leftElbow.y - pose.leftShoulder.y)).toBeLessThan(3);
+        expect(Math.abs(pose.leftElbow.y - pose.leftHand.y)).toBeLessThan(3);
       }
     }
+    const deadBug = EXERCISE_ANIMATIONS['ex-dead-bug'].front;
+    expect(deadBug.projection).toBe('top');
+    expect(deadBug.end.leftHand.y).toBeLessThan(deadBug.end.head.y);
+    expect(deadBug.end.rightFoot.y).toBeGreaterThan(deadBug.start.rightFoot.y);
+    const triceps = EXERCISE_ANIMATIONS['ex-triceps-testa-halter'].front;
+    expect(triceps.projection).toBe('top');
+    expect(triceps.start.leftElbow).toEqual(triceps.end.leftElbow);
+    expect(triceps.start.leftHand.y).toBeLessThan(triceps.end.leftHand.y);
   });
 
   it('fornece fallback seguro por grupo muscular para exercícios personalizados', () => {

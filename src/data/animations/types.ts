@@ -120,6 +120,7 @@ export interface SideViewSpec {
 }
 
 export interface FrontViewSpec {
+  projection?: 'top';
   apparatus: ApparatusPreset;
   apparatusConfig?: ApparatusConfig;
   load: LoadStyle;

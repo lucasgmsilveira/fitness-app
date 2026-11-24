@@ -3,7 +3,7 @@ import type { Exercise, FoodItem, NutritionGoal, Routine } from './types';
 import { INITIAL_FOODS, SEED_TIMESTAMP_V1 } from '../data/foodCatalog';
 
 export { INITIAL_FOODS, SEED_TIMESTAMP_V1 };
-export const CURRENT_SEED_VERSION = '4';
+export const CURRENT_SEED_VERSION = '5';
 export const SEED_TIMESTAMP_V4 = '2026-11-23T20:15:00.000Z';
 
 export const INITIAL_EXERCISES: Exercise[] = [
@@ -25,7 +25,8 @@ export const INITIAL_EXERCISES: Exercise[] = [
   // Costas
   { id: 'ex-puxada-alta', name: 'Puxada Frontal Aberta', muscleGroup: 'Costas', equipment: 'Polia', defaultRestSec: 90, notes: 'Iniciar deprimindo os ombros; evitar inclinar excessivamente o tronco para trás.', createdAt: SEED_TIMESTAMP_V1 },
   { id: 'ex-puxada-triangulo', name: 'Puxada Triângulo', muscleGroup: 'Costas', equipment: 'Polia', defaultRestSec: 90, notes: 'Pegada neutra confortável para ombros e cotovelos; coluna neutra e retorno controlado.', createdAt: SEED_TIMESTAMP_V1 },
-  { id: 'ex-remada-apoiada', name: 'Remada Apoiada no Peito', muscleGroup: 'Costas', equipment: 'Máquina', defaultRestSec: 90, notes: 'Peito firme no apoio elimina cisalhamento lombar; puxar cotovelos sem encolher ombros.', createdAt: SEED_TIMESTAMP_V1 },
+  { id: 'ex-remada-apoiada', name: 'Remada Apoiada no Banco', muscleGroup: 'Costas', equipment: 'Halteres', defaultRestSec: 90, notes: 'Apoie o peito no banco inclinado e puxe os halteres junto às costelas.', createdAt: SEED_TIMESTAMP_V1 },
+  { id: 'ex-remada-maquina-aberta', name: 'Remada Máquina Aberta', muscleGroup: 'Costas', equipment: 'Máquina', defaultRestSec: 90, notes: 'Pegada pronada aberta. Puxe com os cotovelos afastados e aproxime as escápulas.', createdAt: '2026-11-24T12:00:00.000Z' },
   { id: 'ex-remada-convergente-unilateral', name: 'Remada Convergente Unilateral', muscleGroup: 'Costas', equipment: 'Máquina', defaultRestSec: 75, notes: 'Apoio de peito protege a lombar; puxar um lado por vez sem rodar o tronco nem compensar com o ombro.', createdAt: SEED_TIMESTAMP_V4 },
   { id: 'ex-remada-baixa', name: 'Remada Baixa Triângulo', muscleGroup: 'Costas', equipment: 'Polia', defaultRestSec: 90, notes: 'Manter tronco estável e coluna neutra sem balanço.', createdAt: SEED_TIMESTAMP_V1 },
   { id: 'ex-remada-unilateral', name: 'Serrote Apoiado no Banco', muscleGroup: 'Costas', equipment: 'Halteres', defaultRestSec: 75, notes: 'Apoiar mão/peito no banco inclinado sem girar a lombar.', createdAt: SEED_TIMESTAMP_V1 },
@@ -95,7 +96,7 @@ export const INITIAL_ROUTINES: Routine[] = [
         targetSets: 3,
         targetReps: '8-12',
         restSec: 90,
-        notes: 'Remada máquina aberta com peito apoiado: zero cisalhamento lombar; retrair escápulas sem encolher ombros.',
+        notes: 'Apoie o peito no banco inclinado e puxe os halteres junto às costelas.',
       },
       {
         exerciseId: 'ex-elevacao-lateral',
@@ -271,7 +272,7 @@ export const INITIAL_GOAL: NutritionGoal = {
   updatedAt: SEED_TIMESTAMP_V1,
 };
 
-async function upsertMissingCatalogExercises(db: GymLogDB): Promise<void> {
+async function upsertMissingCatalogExercises(db: GymLogDB, upgradeLegacy = true): Promise<void> {
   const existingExercises = await db.exercises.toArray();
   const existingById = new Map(existingExercises.map((ex) => [ex.id, ex]));
   const toPut: Exercise[] = [];
@@ -283,8 +284,18 @@ async function upsertMissingCatalogExercises(db: GymLogDB): Promise<void> {
       continue;
     }
 
+    if (catalogEx.id === 'ex-remada-apoiada' && !existing.isCustom) {
+      toPut.push({
+        ...existing,
+        name: existing.name === 'Remada Apoiada no Peito' ? catalogEx.name : existing.name,
+        equipment: existing.equipment === 'Máquina' ? catalogEx.equipment : existing.equipment,
+        notes: existing.notes === 'Peito firme no apoio elimina cisalhamento lombar; puxar cotovelos sem encolher ombros.' ? catalogEx.notes : existing.notes,
+      });
+      continue;
+    }
+
     const isUntouchedSeedExercise =
-      !existing.isCustom &&
+      upgradeLegacy && !existing.isCustom &&
       existing.createdAt === SEED_TIMESTAMP_V1 &&
       (existing.notes !== catalogEx.notes || existing.name !== catalogEx.name);
 
@@ -363,9 +374,19 @@ export async function ensureInitialSeed(db: GymLogDB): Promise<void> {
         }
       } else {
         // Atualização automática de catálogos e rotinas padrão intocadas (v1/v2/v3 -> v4) sem apagar edições
-        await upsertMissingCatalogExercises(db);
-        await upsertCatalogFoods(db);
+        await upsertMissingCatalogExercises(db, versionAgain?.value !== '4');
+        if (versionAgain?.value !== '4') {
+          await upsertCatalogFoods(db);
+        }
         const currentRoutines = await db.routines.toArray();
+        for (const routine of currentRoutines) {
+          const entry = routine.exercises.find(e => e.exerciseId === 'ex-remada-apoiada' &&
+            e.notes === 'Remada máquina aberta com peito apoiado: zero cisalhamento lombar; retrair escápulas sem encolher ombros.');
+          if (entry) {
+            entry.notes = 'Apoie o peito no banco inclinado e puxe os halteres junto às costelas.';
+            await db.routines.put(routine);
+          }
+        }
         const isUntouchedV1Default =
           currentRoutines.length === 2 &&
           currentRoutines.every(

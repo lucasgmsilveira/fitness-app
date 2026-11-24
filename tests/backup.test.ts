@@ -28,6 +28,20 @@ afterEach(async () => {
 });
 
 describe('Seed A/B/C/D, exportação e restauração JSON no IndexedDB', () => {
+  it('migra as duas remadas do catálogo v4 preservando notas pessoais', async () => {
+    await ensureInitialSeed(testDb);
+    await testDb.exercises.delete('ex-remada-maquina-aberta');
+    await testDb.exercises.update('ex-remada-apoiada', {
+      name: 'Remada Apoiada no Peito', equipment: 'Máquina', notes: 'Meu ajuste do banco',
+    });
+    await testDb.appMeta.put({ key: 'seedVersion', value: '4' });
+    await ensureInitialSeed(testDb);
+    expect(await testDb.exercises.get('ex-remada-apoiada')).toMatchObject({
+      name: 'Remada Apoiada no Banco', equipment: 'Halteres', notes: 'Meu ajuste do banco',
+    });
+    expect(await testDb.exercises.get('ex-remada-maquina-aberta')).toMatchObject({ equipment: 'Máquina' });
+  });
+
   it('popula catálogo completo e as 4 rotinas A/B/C/D de forma idempotente', async () => {
     await ensureInitialSeed(testDb);
     const firstCount = await testDb.exercises.count();
