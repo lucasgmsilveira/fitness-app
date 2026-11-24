@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Pause, Play } from 'lucide-react';
 import {
   interpolateFrontPose,
@@ -47,38 +47,36 @@ function Limb({
   highlight?: boolean;
   highlightOpacity?: number;
 }) {
+  const length = Math.hypot(b.x - a.x, b.y - a.y);
+  const angle = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+  // Local axes follow the bone. The muscle belly narrows towards the distal joint.
   return (
-    <g>
-      <line
-        x1={a.x}
-        y1={a.y}
-        x2={b.x}
-        y2={b.y}
-        stroke={stroke}
-        strokeWidth={width + 2.2}
-        strokeLinecap="round"
-      />
-      <line
-        x1={a.x}
-        y1={a.y}
-        x2={b.x}
-        y2={b.y}
-        stroke={fill}
-        strokeWidth={width}
-        strokeLinecap="round"
-      />
-      {highlight && (
-        <line
-          x1={a.x}
-          y1={a.y}
-          x2={b.x}
-          y2={b.y}
-          stroke="#F97316"
-          strokeOpacity={highlightOpacity}
-          strokeWidth={Math.max(4, width - 2)}
-          strokeLinecap="round"
-        />
-      )}
+    <g transform={`translate(${a.x} ${a.y}) rotate(${angle})`}>
+      <g transform={`scale(${Math.max(1, length)} ${width})`}>
+        <path d="M0 -.4 C.18 -.61 .42 -.72 .66 -.46 S.88 -.31 1 -.29
+                 C1.08 -.23 1.08 .21 1 .29 C.81 .32 .64 .31 .45 .49
+                 C.27 .62 .09 .58 0 .4 Q-.11 0 0 -.4Z"
+          fill={fill} stroke={stroke} strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
+        <path d="M.04 -.24 C.21 -.56 .47 -.59 .73 -.32
+                 C.52 -.34 .29 -.03 .04 -.24Z"
+          fill={highlight ? '#FB923C' : '#DCE6F8'} opacity={highlight ? highlightOpacity : 0.19} />
+        {highlight && <path d="M.08 .13 Q.35 -.18 .79 -.18 Q.38 .53 .08 .32Z"
+          fill="#F97316" opacity={highlightOpacity} />}
+      </g>
+    </g>
+  );
+}
+
+function Head({ head, neck, facing }: { head: Point2D; neck: Point2D; facing?: number }) {
+  const tilt = Math.atan2(head.x - neck.x, neck.y - head.y) * 180 / Math.PI;
+  return (
+    <g transform={`translate(${head.x} ${head.y}) rotate(${tilt}) scale(${facing ?? 1} 1)`}>
+      <path d={facing
+        ? 'M-9 1 C-13 -13 6 -17 9 -6 L9 -2 12 2 9 3 Q9 11 5 12 L0 11 -5 7Z'
+        : 'M-9 -3 C-10 -16 10 -16 9 -3 L8 5 Q5 12 0 13 Q-6 11 -8 5Z'}
+        fill="#758398" stroke="#A7B2C2" strokeWidth="1" />
+      <path d="M-9 2 C-14 -14 5 -18 9 -7 Q6 -9 2 -7 Q-3 -6 -6 2Z" fill="#323A49" />
+      {facing && <path d="M-3 0 Q-6 -3 -6 1 Q-5 5 -3 4 M5 -3 L8 -3" fill="none" stroke="#414C5D" />}
     </g>
   );
 }
@@ -808,9 +806,9 @@ export function ExerciseExecutionScene({
 
           {/* Tronco + Pelvis */}
           <Limb
-            a={pose.hip}
-            b={pose.shoulder}
-            width={17}
+            a={pose.shoulder}
+            b={pose.hip}
+            width={23}
             fill="#373C4F"
             stroke="#78809A"
           />
@@ -871,20 +869,7 @@ export function ExerciseExecutionScene({
 
           {/* Pescoço e Cabeça */}
           <Limb a={pose.shoulder} b={pose.neck} width={7} fill="#373C4F" stroke="#78809A" />
-          <circle
-            cx={pose.head.x}
-            cy={pose.head.y}
-            r="11.5"
-            fill="#3B4054"
-            stroke="#8B93B0"
-            strokeWidth="1.6"
-          />
-          <circle
-            cx={pose.head.x + faceDir * 6.5}
-            cy={pose.head.y - 1.5}
-            r="1.7"
-            fill="#CBD5E1"
-          />
+          <Head head={pose.head} neck={pose.neck} facing={faceDir} />
 
           {/* Braço próximo */}
           <Limb
@@ -1100,14 +1085,7 @@ export function ExerciseExecutionScene({
 
         {/* Pescoço e Cabeça */}
         <Limb a={shoulderMid} b={pose.neck} width={7} fill="#373C4F" stroke="#78809A" />
-        <circle
-          cx={pose.head.x}
-          cy={pose.head.y}
-          r="11.5"
-          fill="#3B4054"
-          stroke="#8B93B0"
-          strokeWidth="1.6"
-        />
+        <Head head={pose.head} neck={pose.neck} />
 
         {/* Braços */}
         <Limb
@@ -1172,6 +1150,8 @@ export function ExerciseExecutionPlayer({
   const [speed, setSpeed] = useState<0.5 | 1>(1);
   const [progress, setProgress] = useState(0);
 
+  const cyclePhase = useRef(0);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -1184,21 +1164,22 @@ export function ExerciseExecutionPlayer({
     if (viewMode !== 'animated' || !playing) return;
     let rafId = 0;
     let lastTime = performance.now();
-    let phase = 0;
+    let phase = cyclePhase.current;
     const cycleMs = 3200;
 
     const tick = (now: number) => {
       const dt = Math.min(100, now - lastTime);
       lastTime = now;
       phase = (phase + (dt * speed) / cycleMs) % 1;
+      cyclePhase.current = phase;
       // Vai (0->1) com breve pausa no pico e volta (1->0)
       let p: number;
-      if (phase < 0.42) {
-        p = phase / 0.42;
-      } else if (phase < 0.54) {
+      if (phase < 0.36) {
+        p = phase / 0.36;
+      } else if (phase < 0.46) {
         p = 1;
       } else if (phase < 0.92) {
-        p = 1 - (phase - 0.54) / 0.38;
+        p = 1 - (phase - 0.46) / 0.46;
       } else {
         p = 0;
       }
@@ -1277,7 +1258,9 @@ export function ExerciseExecutionPlayer({
               value={Math.round(progress * 100)}
               onChange={(e) => {
                 setPlaying(false);
-                setProgress(Number(e.target.value) / 100);
+                const position = Number(e.target.value) / 100;
+                cyclePhase.current = position * 0.36;
+                setProgress(position);
               }}
               aria-label="Posição da execução"
               className="w-full accent-[#F97316] h-1.5 bg-[#25252C] rounded-lg cursor-pointer"
