@@ -111,7 +111,7 @@ export function ExerciseVisualGuideModal({
                 key={mId}
                 type="button"
                 onClick={() => handleInspectMuscle(mId)}
-                className="px-2 py-0.5 rounded-full text-[0.75rem] font-medium bg-[#F97316]/15 text-[#F97316] border border-[#F97316]/35 hover:bg-[#F97316]/25 transition-colors"
+                className="px-2 py-0.5 rounded-full text-[0.75rem] font-medium bg-[#D95353]/18 text-[#FCA5A5] border border-[#D95353]/40 hover:bg-[#D95353]/28 transition-colors"
               >
                 {MUSCLE_DEFINITIONS[mId].name}
               </button>
@@ -161,11 +161,11 @@ export function ExerciseVisualGuideModal({
             </div>
 
             {exercise.notes && (
-              <div className="rounded-2xl bg-[#F97316]/10 border border-[#F97316]/30 p-3 flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-[#F97316] shrink-0 mt-0.5" />
+              <div className="rounded-2xl bg-[#1A191E] border border-amber-400/25 p-3 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-300/80 shrink-0 mt-0.5" />
                 <div className="text-xs">
-                  <p className="font-semibold text-[#FDBA74]">Nota da sua ficha</p>
-                  <p className="text-[#F4F4F6] mt-0.5 leading-relaxed">{exercise.notes}</p>
+                  <p className="font-semibold text-amber-200/90">Nota da sua ficha</p>
+                  <p className="text-[#E5E7EB] mt-0.5 leading-relaxed">{exercise.notes}</p>
                 </div>
               </div>
             )}
@@ -184,7 +184,7 @@ export function ExerciseVisualGuideModal({
 
           <div className="rounded-2xl bg-[#101014] border border-[#24242E] p-3.5 space-y-3">
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#F97316]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#E05A5A]">
                 Músculos Principais (Agonistas)
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -194,11 +194,12 @@ export function ExerciseVisualGuideModal({
                     <button
                       key={mId}
                       type="button"
+                      aria-pressed={active}
                       onClick={() => setFocusedMuscle(active ? null : mId)}
                       className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                         active
-                          ? 'bg-[#F97316] text-black border-[#F97316]'
-                          : 'bg-[#F97316]/15 text-[#FDBA74] border-[#F97316]/35 hover:bg-[#F97316]/25'
+                          ? 'bg-[#D95353] text-white border-[#38BDF8] ring-2 ring-[#38BDF8]/80'
+                          : 'bg-[#D95353]/18 text-[#FCA5A5] border-[#D95353]/40 hover:bg-[#D95353]/28'
                       }`}
                     >
                       {MUSCLE_DEFINITIONS[mId].name}
@@ -210,7 +211,7 @@ export function ExerciseVisualGuideModal({
 
             {guide.secondaryMuscles.length > 0 && (
               <div className="space-y-1.5 pt-1 border-t border-[#202028]">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[#38BDF8]">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#F5B06B]">
                   Secundários e Estabilizadores
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -220,11 +221,12 @@ export function ExerciseVisualGuideModal({
                       <button
                         key={mId}
                         type="button"
+                        aria-pressed={active}
                         onClick={() => setFocusedMuscle(active ? null : mId)}
                         className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                           active
-                            ? 'bg-[#38BDF8] text-black border-[#38BDF8]'
-                            : 'bg-[#38BDF8]/12 text-[#BAE6FD] border-[#38BDF8]/30 hover:bg-[#38BDF8]/20'
+                            ? 'bg-[#F0A458] text-[#101014] border-[#38BDF8] ring-2 ring-[#38BDF8]/80'
+                            : 'bg-[#F0A458]/16 text-[#FCD6AA] border-[#F0A458]/38 hover:bg-[#F0A458]/26'
                         }`}
                       >
                         {MUSCLE_DEFINITIONS[mId].name}

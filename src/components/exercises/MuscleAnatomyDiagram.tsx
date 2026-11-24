@@ -72,61 +72,72 @@ function BodyViewSvg({
           />
         ))}
 
-        {/* Grupos musculares */}
-        {groups.map((grp) => {
-          const isPrimary = primarySet.has(grp.id);
-          const isSecondary = !isPrimary && secondarySet.has(grp.id);
-          const isFocused = focusedMuscle === grp.id;
-          const isActive = isPrimary || isSecondary;
+        {/* Grupos musculares (músculo focado renderizado por último para o contorno ficar acima) */}
+        {[...groups]
+          .sort((a, b) =>
+            a.id === focusedMuscle ? 1 : b.id === focusedMuscle ? -1 : 0,
+          )
+          .map((grp) => {
+            const isPrimary = primarySet.has(grp.id);
+            const isSecondary = !isPrimary && secondarySet.has(grp.id);
+            const isFocused = focusedMuscle === grp.id;
+            const isActive = isPrimary || isSecondary;
 
-          const fill = isPrimary
-            ? '#F97316'
-            : isSecondary
-              ? '#38BDF8'
-              : '#282B38';
-          const fillOpacity = isPrimary
-            ? isFocused
-              ? 0.98
-              : 0.86
-            : isSecondary
-              ? isFocused
-                ? 0.85
-                : 0.55
-              : 0.85;
-          const stroke = isFocused
-            ? '#FDE047'
-            : isPrimary
-              ? '#FDBA74'
+            const fill = isPrimary
+              ? '#D95353'
               : isSecondary
-                ? '#7DD3FC'
-                : '#353848';
-          const strokeWidth = isFocused ? 2.1 : isActive ? 1.2 : 0.7;
+                ? '#F0A458'
+                : '#282B38';
+            const fillOpacity = isPrimary
+              ? isFocused
+                ? 0.98
+                : 0.88
+              : isSecondary
+                ? isFocused
+                  ? 0.86
+                  : 0.62
+                : isFocused
+                  ? 0.92
+                  : 0.85;
+            const stroke = isFocused
+              ? '#38BDF8'
+              : isPrimary
+                ? '#F29B9B'
+                : isSecondary
+                  ? '#FAD1A3'
+                  : '#353848';
+            const strokeWidth = isFocused ? 2.4 : isActive ? 1.2 : 0.7;
 
-          return (
-            <g
-              key={grp.id}
-              className={onSelectMuscle ? 'cursor-pointer' : undefined}
-              onClick={
-                onSelectMuscle
-                  ? () => onSelectMuscle(isFocused ? null : grp.id)
-                  : undefined
-              }
-            >
-              <title>{MUSCLE_DEFINITIONS[grp.id].name}</title>
-              {grp.paths.map((d, pathIdx) => (
-                <path
-                  key={pathIdx}
-                  d={d}
-                  fill={fill}
-                  fillOpacity={fillOpacity}
-                  stroke={stroke}
-                  strokeWidth={strokeWidth}
-                  strokeLinejoin="round"
-                />
-              ))}
-            </g>
-          );
-        })}
+            return (
+              <g
+                key={grp.id}
+                className={onSelectMuscle ? 'cursor-pointer' : undefined}
+                style={
+                  isFocused
+                    ? { filter: 'drop-shadow(0 0 2.5px rgba(56, 189, 248, 0.55))' }
+                    : undefined
+                }
+                onClick={
+                  onSelectMuscle
+                    ? () => onSelectMuscle(isFocused ? null : grp.id)
+                    : undefined
+                }
+              >
+                <title>{MUSCLE_DEFINITIONS[grp.id].name}</title>
+                {grp.paths.map((d, pathIdx) => (
+                  <path
+                    key={pathIdx}
+                    d={d}
+                    fill={fill}
+                    fillOpacity={fillOpacity}
+                    stroke={stroke}
+                    strokeWidth={strokeWidth}
+                    strokeLinejoin="round"
+                  />
+                ))}
+              </g>
+            );
+          })}
       </svg>
     </div>
   );
@@ -181,17 +192,17 @@ export function MuscleAnatomyDiagram({
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
         <div className="flex flex-wrap items-center gap-3 text-[0.75rem] text-[#D1D5DB]">
           <span className="inline-flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#F97316] ring-1 ring-[#FDBA74]/60" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#D95353] ring-1 ring-[#F29B9B]/70" />
             Principal (Agonista)
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#38BDF8]/70 ring-1 ring-[#7DD3FC]/60" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#F0A458]/80 ring-1 ring-[#FAD1A3]/65" />
             Secundário / Estabilizador
           </span>
         </div>
 
         {focusedDef && (
-          <span className="text-[0.75rem] font-medium text-[#FDE047] bg-yellow-500/10 border border-yellow-400/30 px-2 py-0.5 rounded-lg">
+          <span className="text-[0.75rem] font-medium text-[#7DD3FC] bg-[#38BDF8]/12 border border-[#38BDF8]/40 px-2 py-0.5 rounded-lg">
             {focusedDef.name} · {focusedRole}
           </span>
         )}
