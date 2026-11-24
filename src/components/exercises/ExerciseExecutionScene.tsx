@@ -70,13 +70,33 @@ function Limb({
 function Head({ head, neck, facing }: { head: Point2D; neck: Point2D; facing?: number }) {
   const tilt = Math.atan2(head.x - neck.x, neck.y - head.y) * 180 / Math.PI;
   return (
-    <g transform={`translate(${head.x} ${head.y}) rotate(${tilt}) scale(${facing ?? 1} 1)`}>
-      <path d={facing
-        ? 'M-9 1 C-13 -13 6 -17 9 -6 L9 -2 12 2 9 3 Q9 11 5 12 L0 11 -5 7Z'
-        : 'M-9 -3 C-10 -16 10 -16 9 -3 L8 5 Q5 12 0 13 Q-6 11 -8 5Z'}
-        fill="#758398" stroke="#A7B2C2" strokeWidth="1" />
-      <path d="M-9 2 C-14 -14 5 -18 9 -7 Q6 -9 2 -7 Q-3 -6 -6 2Z" fill="#323A49" />
-      {facing && <path d="M-3 0 Q-6 -3 -6 1 Q-5 5 -3 4 M5 -3 L8 -3" fill="none" stroke="#414C5D" />}
+    <g>
+      <path d={`M${neck.x} ${neck.y} L${head.x} ${head.y}`} stroke="#827F82" strokeWidth="7" strokeLinecap="round" />
+      <g transform={`translate(${head.x} ${head.y}) rotate(${tilt}) scale(${facing ?? 1} 1)`}>
+        {facing === undefined ? (
+          <>
+            <path d="M-8 -3 C-9 -15 9 -15 8 -3 Q10 -5 9 0 Q9 3 7.5 3
+                     Q6.7 9 2 11 Q0 12 -2 11 Q-6.7 9 -7.5 3 Q-9 3 -9 0 Q-10 -5 -8 -3Z"
+              fill="#BFACA2" stroke="#D1C2BA" strokeWidth=".7" />
+            <path d="M-8.4 -.7 C-12 -16 12 -16 8.4 -.7 L7 -5 Q0 -8 -7 -5Z" fill="#353B47" />
+            {[-1, 1].map(side => (
+              <g key={side} transform={`scale(${side} 1)`}>
+                <path d="M2 -2 Q4 -3 6 -2" fill="none" stroke="#675C5B" strokeWidth=".8" />
+                <ellipse cx="4" cy="-.4" rx="1.1" ry=".85" fill="#333844" />
+              </g>
+            ))}
+            <path d="M0 0 L-.7 3 1 3 M-2 6 Q0 7 2 6" fill="none" stroke="#896E65" strokeLinecap="round" />
+          </>
+        ) : (
+          <>
+            <path d="M-8 3 C-13 -13 6 -16 8 -6 L8 -2 10.6 1.7 8.2 2.5
+                     Q9 4 7.5 4.7 Q8 9 4 10 L0 10 -5 7Z" fill="#BFACA2" stroke="#D1C2BA" strokeWidth=".7" />
+            <path d="M-8 4 C-14 -13 2 -16 7 -9 L8 -6 Q4 -7 1 -6 L-2 -.2 -5 0 -5 5Z" fill="#353B47" />
+            <path d="M-4 1 Q-6 -2 -6 1 Q-6 4 -4 4 M4 -2 Q6 -3 7 -2 M6 5 L8 5" fill="none" stroke="#886E67" strokeWidth=".8" />
+            <circle cx="6.3" cy="-.5" r=".9" fill="#333844" />
+          </>
+        )}
+      </g>
     </g>
   );
 }
@@ -938,7 +958,11 @@ export function ExerciseExecutionScene({
   const pose = interpolateFrontPose(spec.start, spec.mid, spec.end, progress);
   const shoulderMid = midPoint(pose.leftShoulder, pose.rightShoulder);
   const hipMid = midPoint(pose.leftHip, pose.rightHip);
-  const torsoMid = midPoint(shoulderMid, hipMid);
+  // Place the illustration in the plane of the torso, including the side plank.
+  const torsoTransform = `matrix(${(pose.rightShoulder.x - pose.leftShoulder.x) / 40}
+    ${(pose.rightShoulder.y - pose.leftShoulder.y) / 40}
+    ${(hipMid.x - shoulderMid.x) / 50} ${(hipMid.y - shoulderMid.y) / 50}
+    ${shoulderMid.x} ${shoulderMid.y})`;
 
   return (
     <div className="relative rounded-2xl bg-[#101014] border border-[#24242E] overflow-hidden">
@@ -1019,63 +1043,24 @@ export function ExerciseExecutionScene({
         <circle cx={pose.leftFoot.x} cy={pose.leftFoot.y} r="4.2" fill="#4B526B" />
         <circle cx={pose.rightFoot.x} cy={pose.rightFoot.y} r="4.2" fill="#4B526B" />
 
-        {/* Tronco poligonal simétrico */}
-        <polygon
-          points={`${pose.leftShoulder.x},${pose.leftShoulder.y} ${pose.rightShoulder.x},${pose.rightShoulder.y} ${pose.rightHip.x},${pose.rightHip.y} ${pose.leftHip.x},${pose.leftHip.y}`}
-          fill="#373C4F"
-          stroke="#78809A"
-          strokeWidth="1.8"
-          strokeLinejoin="round"
-        />
-
-        {/* Destaques musculares no tronco */}
-        {activeSet.has('chest') && (
-          <line
-            x1={pose.leftShoulder.x + 8}
-            y1={shoulderMid.y + 8}
-            x2={pose.rightShoulder.x - 8}
-            y2={shoulderMid.y + 8}
-            stroke="#F97316"
-            strokeOpacity={highlightOpacity}
-            strokeWidth="11"
-            strokeLinecap="round"
-          />
-        )}
-        {(activeSet.has('abs') || activeSet.has('obliques')) && (
-          <rect
-            x={torsoMid.x - 10}
-            y={torsoMid.y - 12}
-            width="20"
-            height="28"
-            rx="6"
-            fill="#F97316"
-            fillOpacity={highlightOpacity}
-          />
-        )}
-        {activeSet.has('lats') && (
-          <>
-            <line
-              x1={pose.leftShoulder.x + 4}
-              y1={pose.leftShoulder.y + 12}
-              x2={pose.leftHip.x + 2}
-              y2={pose.leftHip.y - 6}
-              stroke="#F97316"
-              strokeOpacity={highlightOpacity}
-              strokeWidth="7.5"
-              strokeLinecap="round"
-            />
-            <line
-              x1={pose.rightShoulder.x - 4}
-              y1={pose.rightShoulder.y + 12}
-              x2={pose.rightHip.x - 2}
-              y2={pose.rightHip.y - 6}
-              stroke="#F97316"
-              strokeOpacity={highlightOpacity}
-              strokeWidth="7.5"
-              strokeLinecap="round"
-            />
-          </>
-        )}
+        <g transform={torsoTransform}>
+          <path d="M-20 0 Q-12 -1 -5 -4 Q0 -1 5 -4 Q12 -1 20 0
+                   Q22 10 16 24 Q12 33 14 42 L15 50 Q0 59 -15 50
+                   L-14 42 Q-12 33 -16 24 Q-22 10 -20 0Z"
+            fill="#495369" stroke="#8996AA" strokeWidth="1.1" />
+          {[-1, 1].map(side => (
+            <g key={side} transform={`scale(${side} 1)`}>
+              <path d="M1 4 Q11 0 17 4 L16 13 Q10 19 2 15Z"
+                fill={activeSet.has('chest') ? '#F97316' : '#627085'} opacity={activeSet.has('chest') ? highlightOpacity : 0.8} />
+              <path d="M17 14 Q17 24 11 35 L9 29 11 18Z"
+                fill={activeSet.has('lats') ? '#F97316' : '#374257'} opacity={activeSet.has('lats') ? highlightOpacity : 0.8} />
+              <path d="M1 19 Q6 18 9 21 Q7 33 5 39 L1 42Z"
+                fill={activeSet.has('abs') ? '#F97316' : '#536074'} opacity={activeSet.has('abs') ? highlightOpacity : 1} />
+              {activeSet.has('obliques') && <path d="M12 22 L9 39 6 42 Q6 31 12 22Z" fill="#FB923C" opacity={highlightOpacity} />}
+            </g>
+          ))}
+          <path d="M-14 42 Q0 47 14 42 L15 50 Q0 59 -15 50Z" fill="#333D51" />
+        </g>
         {activeSet.has('glutes') && (
           <>
             <circle cx={pose.leftHip.x - 2} cy={pose.leftHip.y} r="7" fill="#F97316" fillOpacity={highlightOpacity} />
