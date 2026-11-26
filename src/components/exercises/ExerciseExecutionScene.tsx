@@ -1,8 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Eye, Pause, Play } from 'lucide-react';
 import {
-  interpolateFrontPose,
-  interpolateSidePose,
+  exerciseViews,
   type ActiveBodyRegion,
   type AnimationView,
   type ApparatusConfig,
@@ -16,6 +15,9 @@ import {
   type SidePose,
   type SideViewSpec,
 } from '../../data/animations/types';
+
+import { dumbbellAxis, executionPose, pallofPlan, ropeRing } from '../../data/animations/executionGeometry';
+import { ProjectedDumbbell } from './ProjectedDumbbell';
 
 const ACTIVE_FILL = '#D95353';
 const ACTIVE_ACCENT = '#E56B6B';
@@ -152,7 +154,7 @@ function SideTorso({
   // In this local frame (+x from shoulder -> hip), local -y is always the anterior (chest/abs)
   // side matching Head's `facing` across upright, inclined, supine and prone poses.
   return (
-    <g transform={`translate(${shoulder.x} ${shoulder.y}) rotate(${angle})`}>
+    <g data-part="torso" transform={`translate(${shoulder.x} ${shoulder.y}) rotate(${angle})`}>
       <g transform={`scale(${length} ${torsoDepth * faceDir})`}>
         {/* Base anatomical side torso */}
         <path
@@ -212,7 +214,15 @@ function SideTorso({
   );
 }
 
-function Head({ head, neck, facing }: { head: Point2D; neck: Point2D; facing?: number }) {
+function Head({ head, neck, facing, endOn }: { head: Point2D; neck: Point2D; facing?: number; endOn?: FrontViewSpec['endOn'] }) {
+  if (endOn) {
+    return <g transform={`translate(${head.x} ${head.y})`}>
+      <ellipse rx="10.4" ry="10.9" fill="#BFACA2" stroke="#C9BBC0" />
+      <path d={endOn === 'prone' ? 'M-10 2 C-12 -15 12 -15 10 2 Q8 8 0 8 Q-8 8 -10 2Z' :
+        'M-10 0 C-11 -15 11 -15 10 0 Q5 -5 -5 -4Z'} fill="#3C4452" />
+      {endOn === 'supine' && <path d="M-2 -1 Q0 -5 2 -1 M-3 4 Q0 5 3 4" fill="none" stroke="#84736B" />}
+    </g>;
+  }
   const tilt = (Math.atan2(head.x - neck.x, neck.y - head.y) * 180) / Math.PI;
   const scale = 1.24;
   return (
@@ -304,6 +314,7 @@ function HandGrip({
 
   return (
     <g
+      data-part={`${role}-hand`}
       transform={`translate(${hand.x} ${hand.y}) rotate(${angle}) scale(1 ${mirrorY})`}
       opacity={dimmed ? 0.78 : 1}
     >
@@ -388,35 +399,103 @@ function CalfFoot({ ankle, toeX, front = false }: { ankle: Point2D; toeX: number
   return <path d={outline} fill="#74839A" stroke="#BCC7D6" strokeWidth="1" />;
 }
 
-function renderDumbbellEndOn(cx: number, cy: number, dimmed = false) {
+function ProfileFoot({ ankle, knee, facing, apparatus, far }: {
+  ankle: Point2D; knee: Point2D; facing: number; apparatus: ApparatusPreset; far?: boolean;
+}) {
+  const followsShin = ['seated-leg-curl', 'leg-extension', 'lying-leg-curl'].includes(apparatus);
+  const angle = apparatus === 'leg-press-45' ? -131 : followsShin ? Math.atan2(ankle.y - knee.y, (ankle.x - knee.x) * facing) * 180 / Math.PI - 90 : 0;
+  const direction = far && apparatus === 'bulgarian-bench' ? -1 : facing;
   return (
-    <g opacity={dimmed ? 0.65 : 1}>
-      <circle cx={cx} cy={cy} r="7.2" fill="#2A303E" stroke="#CBD5E1" strokeWidth="1.4" />
-      <circle cx={cx} cy={cy} r="4.6" fill="#1E2330" stroke="#64748B" strokeWidth="0.8" />
-      <circle cx={cx} cy={cy} r="2.1" fill="#E2E8F0" />
+    <g transform={`translate(${ankle.x} ${ankle.y}) scale(${direction} 1) rotate(${angle})`}>
+      <path d="M-3 -3 Q0 -5 3 -3 L6 -1 11 0 Q13 2 10 3 H-3 Q-5 2 -3 -3Z"
+        fill={far ? '#353D50' : '#66748B'} stroke={far ? '#474F61' : '#B4C0D1'} strokeWidth=".9" />
     </g>
   );
 }
 
-function renderDumbbellBroadside(
-  elbow: Point2D,
-  hand: Point2D,
-  orientation: 'horizontal' | 'perp-forearm',
-  dimmed = false
-) {
-  let angle = 0;
-  if (orientation === 'perp-forearm') {
-    angle = (Math.atan2(hand.y - elbow.y, hand.x - elbow.x) * 180) / Math.PI + 90;
-  }
+function FrontFoot({ ankle, sole = false }: { ankle: Point2D; sole?: boolean }) {
   return (
-    <g transform={`translate(${hand.x} ${hand.y}) rotate(${angle})`} opacity={dimmed ? 0.65 : 1}>
-      {/* Steel handle bar */}
-      <rect x="-10" y="-1.7" width="20" height="3.4" rx="1.4" fill="#CBD5E1" stroke="#18181B" strokeWidth="0.8" />
-      {/* Left & right weight plates */}
-      <rect x="-12.5" y="-6.2" width="4.8" height="12.4" rx="1.6" fill="#2A303E" stroke="#E2E8F0" strokeWidth="1.1" />
-      <rect x="7.7" y="-6.2" width="4.8" height="12.4" rx="1.6" fill="#2A303E" stroke="#E2E8F0" strokeWidth="1.1" />
+    <g data-part="foot" transform={`translate(${ankle.x} ${ankle.y})`}>
+      <path d={sole ? 'M-4.5 1 Q-6 -10 0 -11 Q6 -11 5 -2 L4 3 Q0 6 -4 3Z' :
+        'M-4 -3 Q0 -6 4 -3 L5.5 .5 Q5 3 0 3 Q-6 3 -5 .5Z'}
+        fill="#78879E" stroke="#C8D3E1" strokeWidth="1" />
+      <path d="M-3.5 1.2 Q0 2.4 3.5 1.2" stroke="#404B60" strokeWidth="1" fill="none" />
     </g>
   );
+}
+
+function CableRope({ anchor, ring, hands }: { anchor: Point2D; ring: Point2D; hands: [Point2D, Point2D] }) {
+  return <g data-part="rope">
+    <line x1={anchor.x} y1={anchor.y} x2={ring.x} y2={ring.y} stroke="#A4B2C5" strokeWidth="1.9" />
+    {hands.map((hand, index) => <g key={index}>
+      <line x1={ring.x} y1={ring.y} x2={hand.x} y2={hand.y} stroke="#D6D3D1" strokeWidth="3.5" />
+      <circle cx={hand.x} cy={hand.y} r="3.6" fill="#353D4B" stroke="#9AA8BB" />
+    </g>)}
+    <circle cx={ring.x} cy={ring.y} r="2.5" fill="#BAC6D6" stroke="#556071" />
+  </g>;
+}
+
+function SharedDumbbell({ hand, profile, view }: { hand: Point2D; profile: SidePose; view: 'front' | 'side' }) {
+  // Both palms cup the upper plate. The lower plate hangs behind the neck.
+  const tilt = Math.max(-0.5, Math.min(0.5, (profile.nearHand.x - profile.nearElbow.x) / 48));
+  const down = Math.sqrt(1 - tilt * tilt);
+  const axis = view === 'side' ? { x: tilt, y: down, towardCamera: 0 } : { x: 0, y: down, towardCamera: tilt };
+  const center = { x: hand.x + 8 * axis.x, y: hand.y + 8 * axis.y };
+  return <ProjectedDumbbell hand={center} axis={axis} />;
+}
+
+function PallofOverhead({ pose, cfg }: { pose: FrontPose; cfg: ApparatusConfig }) {
+  const hands = midPoint(pose.leftHand, pose.rightHand);
+  const anchor = { x: cfg.anchorX ?? 52, y: cfg.anchorY ?? 111 };
+  const shoulders = midPoint(pose.leftShoulder, pose.rightShoulder);
+  return (
+    <g>
+      <rect x={anchor.x - 21} y={anchor.y - 30} width="25" height="60" rx="6" fill="#262E3D" stroke="#526078" />
+      {[pose.leftFoot, pose.rightFoot].map((foot, i) => (
+        <ellipse key={i} cx={foot.x} cy={foot.y - 4} rx="5.2" ry="12" fill="#414B5F" stroke="#8390A6" />
+      ))}
+      <ellipse cx={shoulders.x} cy={shoulders.y + 1} rx="23" ry="12" fill="#4B566C" stroke="#8491A5" />
+      {(['left', 'right'] as const).map((side) => <g key={side}>
+        <Limb a={pose[`${side}Shoulder`]} b={pose[`${side}Elbow`]} width={9} fill="#485269" stroke="#939DB1" />
+        <Limb a={pose[`${side}Elbow`]} b={pose[`${side}Hand`]} width={7.5} fill="#485269" stroke="#939DB1" />
+      </g>)}
+      <path d={`M${anchor.x} ${anchor.y} L${hands.x - 6} ${hands.y}`} fill="none" stroke="#B0BBCE" strokeWidth="2" />
+      <circle cx={anchor.x} cy={anchor.y} r="4.5" fill="#93A2B6" />
+      <path d={`M${hands.x - 7} ${hands.y} h14`} stroke="#E4EBF4" strokeWidth="4" strokeLinecap="round" />
+      <HandGrip elbow={pose.leftElbow} hand={pose.leftHand} grip="neutral" role="left" />
+      <HandGrip elbow={pose.rightElbow} hand={pose.rightHand} grip="neutral" role="right" />
+      <path d={`M${pose.head.x - 4} ${pose.head.y - 9} l4 -7 4 7Z`} fill="#C2AEA4" stroke="#AD998D" />
+      <ellipse cx={pose.head.x} cy={pose.head.y} rx="12" ry="4.2" fill="#C2AEA4" />
+      <ellipse cx={pose.head.x} cy={pose.head.y} rx="10.4" ry="11.8" fill="#414755" stroke="#9097A5" />
+      <path d={`M${pose.head.x - 7} ${pose.head.y + 4} q-1 -9 6 -12`} fill="none" stroke="#646E80" strokeWidth="1.6" />
+    </g>
+  );
+}
+
+function PeckDeckArm({ hand, pivot, near }: { hand: Point2D; pivot: Point2D; near?: boolean }) {
+  return (
+    <g data-part={near ? 'near-lever' : 'far-lever'}>
+      <path d={`M ${pivot.x} ${pivot.y} L ${hand.x} ${pivot.y + 3} V ${hand.y + 8}`}
+        fill="none" stroke={near ? '#77859D' : '#41495F'} strokeWidth={near ? 3.6 : 2.8} strokeLinejoin="round" />
+      <rect x={hand.x - 2.8} y={hand.y - 10} width="5.6" height="20" rx="2.8" fill="#667389" />
+      <circle cx={pivot.x} cy={pivot.y} r="3.3" fill="#A6B4C8" />
+    </g>
+  );
+}
+
+function peckDeckPivot(cfg: ApparatusConfig) {
+  return { x: cfg.pivotX ?? (cfg.padX === undefined ? 138 : (cfg.seatX ?? 116) + 16), y: cfg.pivotY ?? 44 };
+}
+
+function rollerContact(pose: SidePose, posterior: boolean): Point2D {
+  const dx = pose.nearFoot.x - pose.nearKnee.x;
+  const dy = pose.nearFoot.y - pose.nearKnee.y;
+  const length = Math.hypot(dx, dy) || 1;
+  const normal = posterior ? 7 : -7;
+  return {
+    x: pose.nearFoot.x - (6 * dx + normal * dy) / length,
+    y: pose.nearFoot.y + (normal * dx - 6 * dy) / length,
+  };
 }
 
 function renderSideApparatus(
@@ -453,16 +532,16 @@ function renderSideApparatus(
       );
     }
     case 'incline-bench': {
-      const bx = cfg.benchX ?? 124;
+      const bx = viewSpec.start.hip.x - 12;
       const by = cfg.benchY ?? 144;
       return (
         <g stroke="#394052" strokeWidth="1.4">
-          <line x1={bx - 22} y1={by + 4} x2={bx - 30} y2="190" strokeWidth="4" strokeLinecap="round" />
+          <line x1={bx + 10} y1={by + 4} x2={bx - 16} y2="190" strokeWidth="4" strokeLinecap="round" />
           <line x1={bx + 42} y1={by + 10} x2={bx + 48} y2="190" strokeWidth="4" strokeLinecap="round" />
           {/* Encosto inclinado */}
           <line
-            x1={bx - 36}
-            y1={by - 58}
+            x1={viewSpec.start.neck.x - 12}
+            y1={viewSpec.start.neck.y + 2}
             x2={bx + 12}
             y2={by + 4}
             stroke="#232836"
@@ -470,8 +549,8 @@ function renderSideApparatus(
             strokeLinecap="round"
           />
           <line
-            x1={bx - 36}
-            y1={by - 58}
+            x1={viewSpec.start.neck.x - 12}
+            y1={viewSpec.start.neck.y + 2}
             x2={bx + 12}
             y2={by + 4}
             stroke="#3E465C"
@@ -491,6 +570,7 @@ function renderSideApparatus(
       return (
         <g stroke="#394052" strokeWidth="1.4">
           <rect x={sx - 16} y="76" width="12" height="114" rx="4" fill="#1B1F2A" />
+          <line x1={px} y1={py} x2="230" y2={py} strokeWidth="6" />
           <rect x="218" y="42" width="20" height="148" rx="4" fill="#1B1F2A" />
           <rect x={sx - 6} y={sy - 60} width="10" height="62" rx="4" fill="#252B3B" />
           <rect x={sx} y={sy} width="46" height="10" rx="4" fill="#252B3B" />
@@ -513,8 +593,7 @@ function renderSideApparatus(
       const hasFrontChestPad = cfg.padX !== undefined;
       const sx = cfg.seatX ?? 116;
       const sy = cfg.seatY ?? 140;
-      const px = cfg.pivotX ?? (hasFrontChestPad ? sx + 16 : 138);
-      const py = cfg.pivotY ?? 44;
+      const { x: px, y: py } = peckDeckPivot(cfg);
       const seatLeft = hasFrontChestPad ? sx - 22 : sx;
       return (
         <g stroke="#394052" strokeWidth="1.4">
@@ -551,19 +630,7 @@ function renderSideApparatus(
           {/* Assento */}
           <rect x={seatLeft} y={sy} width="46" height="10" rx="4" fill="#252B3B" />
           <line x1={seatLeft + 22} y1={sy + 10} x2={seatLeft + 22} y2="190" strokeWidth="4" />
-          {/* Alavanca distante + próxima */}
-          {[pose.farHand, pose.nearHand].map((hand, i) => (
-            <path key={i} d={`M ${px} ${py} L ${hand.x} ${py + 3} V ${hand.y + 8}`}
-              fill="none" stroke={i ? '#64718A' : '#41495F'} strokeWidth={i ? 3.4 : 2.8} strokeLinejoin="round" />
-          ))}
-          <rect
-            x={pose.nearHand.x - 3}
-            y={pose.nearHand.y - 10}
-            width="6"
-            height="20"
-            rx="3"
-            fill="#475569"
-          />
+          <PeckDeckArm hand={pose.farHand} pivot={{ x: px, y: py }} />
           <circle cx={px} cy={py} r="4.5" fill="#7A869E" stroke="none" />
           <circle cx={px} cy={py} r="1.8" fill="#CBD5E1" stroke="none" />
         </g>
@@ -668,11 +735,11 @@ function renderSideApparatus(
       return (
         <g stroke="#394052" strokeWidth="1.4">
           <line x1="126" y1="152" x2="120" y2="190" strokeWidth="4" />
-          <line x1="194" y1="152" x2="202" y2="190" strokeWidth="4" />
+          <line x1="162" y1="146" x2="202" y2="190" strokeWidth="4" />
           {/* Apoio de peito inclinado */}
           <line
-            x1="196"
-            y1="92"
+            x1="184"
+            y1="101"
             x2="162"
             y2="146"
             stroke="#252B3B"
@@ -681,6 +748,9 @@ function renderSideApparatus(
           />
           {/* Assento */}
           <rect x="126" y="144" width="44" height="10" rx="4" fill="#252B3B" />
+          {viewSpec.load === 'none' && (
+            <line x1={cfg.pivotX ?? 252} y1={cfg.pivotY ?? 72} x2={cfg.pivotX ?? 252} y2="190" strokeWidth="5" />
+          )}
           {viewSpec.load === 'none' && (
             <line
               x1={cfg.pivotX ?? 252}
@@ -725,7 +795,7 @@ function renderSideApparatus(
     case 'cable-single': {
       const ax = cfg.anchorX ?? 234;
       const ay = cfg.anchorY ?? 28;
-      const targets = resolveSideCableTargets(pose, cfg);
+      const targets = viewSpec.load === 'rope' ? [] : resolveSideCableTargets(pose, cfg);
       return (
         <g stroke="#394052" strokeWidth="1.4">
           <rect
@@ -755,14 +825,14 @@ function renderSideApparatus(
       return (
         <g stroke="#394052" strokeWidth="1.4">
           <line x1="112" y1="150" x2="108" y2="190" strokeWidth="4" />
-          <line x1="176" y1="126" x2="182" y2="190" strokeWidth="4" />
+          <line x1="160" y1="126" x2="182" y2="190" strokeWidth="4" />
           <rect x="98" y="144" width="44" height="9" rx="4" fill="#252B3B" />
           {/* Almofada Scott inclinada */}
           <line
-            x1="150"
-            y1="100"
-            x2="178"
-            y2="132"
+            x1="132"
+            y1="106"
+            x2="160"
+            y2="127"
             stroke="#252B3B"
             strokeWidth="12"
             strokeLinecap="round"
@@ -804,6 +874,7 @@ function renderSideApparatus(
       );
     }
     case 'leg-extension': {
+      const roller = rollerContact(pose, false);
       const px = cfg.pivotX ?? 166;
       const py = cfg.pivotY ?? 144;
       return (
@@ -815,19 +886,20 @@ function renderSideApparatus(
           <line
             x1={px}
             y1={py}
-            x2={pose.nearFoot.x}
-            y2={pose.nearFoot.y - 6}
+            x2={roller.x}
+            y2={roller.y}
             stroke="#59637D"
             strokeWidth="3.5"
             strokeLinecap="round"
           />
           <circle cx={px} cy={py} r="4.5" fill="#7A869E" stroke="none" />
           <circle cx={px} cy={py} r="1.8" fill="#CBD5E1" stroke="none" />
-          <circle cx={pose.nearFoot.x + 2} cy={pose.nearFoot.y - 6} r="6.5" fill="#475569" />
+          <circle cx={roller.x} cy={roller.y} r="6.5" fill="#475569" />
         </g>
       );
     }
     case 'seated-leg-curl': {
+      const roller = rollerContact(pose, true);
       const px = cfg.pivotX ?? 168;
       const py = cfg.pivotY ?? 144;
       return (
@@ -840,19 +912,20 @@ function renderSideApparatus(
           <line
             x1={px}
             y1={py}
-            x2={pose.nearFoot.x}
-            y2={pose.nearFoot.y + 4}
+            x2={roller.x}
+            y2={roller.y}
             stroke="#59637D"
             strokeWidth="3.5"
             strokeLinecap="round"
           />
           <circle cx={px} cy={py} r="4.5" fill="#7A869E" stroke="none" />
           <circle cx={px} cy={py} r="1.8" fill="#CBD5E1" stroke="none" />
-          <circle cx={pose.nearFoot.x} cy={pose.nearFoot.y + 6} r="6.5" fill="#475569" />
+          <circle cx={roller.x} cy={roller.y} r="6.5" fill="#475569" />
         </g>
       );
     }
     case 'lying-leg-curl': {
+      const roller = rollerContact(pose, false);
       const px = cfg.pivotX ?? 194;
       const py = cfg.pivotY ?? 138;
       return (
@@ -863,15 +936,15 @@ function renderSideApparatus(
           <line
             x1={px}
             y1={py}
-            x2={pose.nearFoot.x}
-            y2={pose.nearFoot.y - 4}
+            x2={roller.x}
+            y2={roller.y}
             stroke="#59637D"
             strokeWidth="3.5"
             strokeLinecap="round"
           />
           <circle cx={px} cy={py} r="4.5" fill="#7A869E" stroke="none" />
           <circle cx={px} cy={py} r="1.8" fill="#CBD5E1" stroke="none" />
-          <circle cx={pose.nearFoot.x} cy={pose.nearFoot.y - 6} r="6.5" fill="#475569" />
+          <circle cx={roller.x} cy={roller.y} r="6.5" fill="#475569" />
         </g>
       );
     }
@@ -1017,11 +1090,11 @@ function renderFrontApparatus(
       );
     case 'flat-bench': {
       const bx = cfg.benchX ?? 160;
-      const by = cfg.benchY ?? 114;
+      const by = cfg.benchY ?? 145;
       return (
         <g stroke="#394052" strokeWidth="1.4">
-          <rect x={bx - 18} y={by} width="36" height="62" rx="6" fill="#252B3B" />
-          <line x1={bx} y1={by + 62} x2={bx} y2="190" strokeWidth="4" />
+          <rect x={bx - 18} y={by} width="36" height="9" rx="4" fill="#252B3B" />
+          <line x1={bx} y1={by + 9} x2={bx} y2="190" strokeWidth="4" />
         </g>
       );
     }
@@ -1199,15 +1272,8 @@ function renderFrontApparatus(
       const ay = cfg.anchorY ?? 112;
       const isCenteredTower = Math.abs(ax - 160) < 16;
       const towerX = isCenteredTower ? ax - 7 : ax < 160 ? ax - 14 : ax + 2;
-      const targets =
-        viewSpec.load === 'rope'
-          ? [
-              {
-                x: (pose.leftHand.x + pose.rightHand.x) / 2,
-                y: Math.min(pose.leftHand.y, pose.rightHand.y) - 14,
-              },
-            ]
-          : resolveFrontCableTargets(pose, cfg, exerciseId, ax, ay);
+      const targets = viewSpec.load === 'rope' || exerciseId === 'ex-pallof-press'
+        ? [] : resolveFrontCableTargets(pose, cfg, exerciseId, ax, ay);
       return (
         <g stroke="#394052" strokeWidth="1.4">
           <rect
@@ -1300,29 +1366,17 @@ function renderFrontApparatus(
       );
     }
     case 'leg-extension': {
-      const rollerY = (pose.leftFoot.y + pose.rightFoot.y) / 2 - 4;
-      const leftX = Math.min(pose.leftFoot.x, pose.rightFoot.x) - 18;
-      const rightX = Math.max(pose.leftFoot.x, pose.rightFoot.x) + 18;
       return (
         <g stroke="#394052" strokeWidth="1.4">
           <rect x="140" y="62" width="40" height="66" rx="6" fill="#252B3B" />
           <rect x="130" y="128" width="60" height="10" rx="4" fill="#252B3B" />
           <line x1="142" y1="138" x2="142" y2="190" strokeWidth="4" />
           <line x1="178" y1="138" x2="178" y2="190" strokeWidth="4" />
-          {/* Rolo frontal sobre canelas */}
-          <rect
-            x={leftX}
-            y={rollerY - 5}
-            width={Math.max(44, rightX - leftX)}
-            height="10"
-            rx="5"
-            fill="#475569"
-          />
+
         </g>
       );
     }
     case 'seated-leg-curl': {
-      const thighPadY = (pose.leftKnee.y + pose.rightKnee.y) / 2 - 12;
       const rollerY = (pose.leftFoot.y + pose.rightFoot.y) / 2 + 2;
       const leftX = Math.min(pose.leftFoot.x, pose.rightFoot.x) - 18;
       const rightX = Math.max(pose.leftFoot.x, pose.rightFoot.x) + 18;
@@ -1332,8 +1386,7 @@ function renderFrontApparatus(
           <rect x="130" y="128" width="60" height="10" rx="4" fill="#252B3B" />
           <line x1="142" y1="138" x2="142" y2="190" strokeWidth="4" />
           <line x1="178" y1="138" x2="178" y2="190" strokeWidth="4" />
-          {/* Trava sobre as coxas */}
-          <rect x="122" y={thighPadY} width="76" height="8" rx="4" fill="#475569" />
+          <rect x="123" y="188" width="74" height="5" rx="2" fill="#374256" />
           {/* Rolo posterior nos tornozelos */}
           <rect
             x={leftX}
@@ -1383,6 +1436,9 @@ function renderFrontApparatus(
           <rect x="142" y="64" width="36" height="68" rx="6" fill="#252B3B" />
           <rect x="136" y="130" width="48" height="10" rx="4" fill="#252B3B" />
           <line x1="160" y1="140" x2="160" y2="190" strokeWidth="4" />
+          {[pose.leftFoot, pose.rightFoot].map((foot, i) => (
+            <path key={i} d={`M160 152 L${foot.x} ${foot.y + 5} h${i ? 8 : -8}`} stroke="#5A687D" strokeWidth="4" fill="none" />
+          ))}
           <rect
             x={pose.leftKnee.x - 10}
             y={pose.leftKnee.y - 12}
@@ -1407,6 +1463,9 @@ function renderFrontApparatus(
           <rect x="142" y="64" width="36" height="68" rx="6" fill="#252B3B" />
           <rect x="136" y="130" width="48" height="10" rx="4" fill="#252B3B" />
           <line x1="160" y1="140" x2="160" y2="190" strokeWidth="4" />
+          {[pose.leftFoot, pose.rightFoot].map((foot, i) => (
+            <path key={i} d={`M160 152 L${foot.x} ${foot.y + 5} h${i ? 8 : -8}`} stroke="#5A687D" strokeWidth="4" fill="none" />
+          ))}
           <rect
             x={pose.leftKnee.x + 4}
             y={pose.leftKnee.y - 12}
@@ -1486,25 +1545,16 @@ function renderFrontApparatus(
 }
 
 function renderSideLoad(load: LoadStyle, pose: SidePose, viewSpec: SideViewSpec) {
-  const grip = viewSpec.grip;
   const cfg = viewSpec.apparatusConfig ?? {};
-  const isNeutral = grip === 'neutral';
+  const isNeutral = viewSpec.grip === 'neutral';
 
   switch (load) {
     case 'none':
       return null;
+    case 'dumbbell-shared':
     case 'dumbbells':
-      return (
-        <g>
-          {isNeutral
-            ? renderDumbbellBroadside(pose.nearElbow, pose.nearHand, 'perp-forearm', false)
-            : renderDumbbellEndOn(pose.nearHand.x, pose.nearHand.y, false)}
-        </g>
-      );
     case 'dumbbell-near':
-      return isNeutral
-        ? renderDumbbellBroadside(pose.nearElbow, pose.nearHand, 'perp-forearm', false)
-        : renderDumbbellEndOn(pose.nearHand.x, pose.nearHand.y, false);
+      return null; // Drawn together with the gripping hand at its own depth.
     case 'bar-wide': {
       return (
         <g>
@@ -1543,35 +1593,8 @@ function renderSideLoad(load: LoadStyle, pose: SidePose, viewSpec: SideViewSpec)
           />
         </g>
       );
-    case 'rope': {
-      const dx = pose.nearHand.x - pose.nearElbow.x;
-      const dy = pose.nearHand.y - pose.nearElbow.y;
-      const len = Math.hypot(dx, dy) || 1;
-      const ux = dx / len;
-      const uy = dy / len;
-      return (
-        <g>
-          <line
-            x1={pose.nearHand.x - ux * 6}
-            y1={pose.nearHand.y - uy * 6}
-            x2={pose.nearHand.x + ux * 8}
-            y2={pose.nearHand.y + uy * 8}
-            stroke="#D6D3D1"
-            strokeWidth="4.2"
-            strokeLinecap="round"
-            strokeDasharray="3 1.5"
-          />
-          <circle
-            cx={pose.nearHand.x + ux * 9}
-            cy={pose.nearHand.y + uy * 9}
-            r="3.6"
-            fill="#1F2430"
-            stroke="#94A3B8"
-            strokeWidth="1.1"
-          />
-        </g>
-      );
-    }
+    case 'rope':
+      return null; // Ring and both branches are projected together.
     case 'cable-handle': {
       const targets =
         viewSpec.apparatus === 'dual-cable-high' || cfg.cableHand === 'both'
@@ -1632,36 +1655,10 @@ function renderFrontLoad(
   switch (load) {
     case 'none':
       return null;
+    case 'dumbbell-shared':
     case 'dumbbells':
-      if (viewSpec.projection === 'top') {
-        return [pose.leftHand, pose.rightHand].map((hand, i) => (
-          <g key={i} transform={`rotate(90 ${hand.x} ${hand.y})`}>
-            {renderDumbbellBroadside(hand, hand, 'horizontal')}
-          </g>
-        ));
-      }
-      return (
-        <g>
-          {isNeutral ? (
-            <>
-              {renderDumbbellEndOn(pose.leftHand.x, pose.leftHand.y)}
-              {renderDumbbellEndOn(pose.rightHand.x, pose.rightHand.y)}
-            </>
-          ) : (
-            <>
-              {renderDumbbellBroadside(pose.leftElbow, pose.leftHand, 'horizontal')}
-              {renderDumbbellBroadside(pose.rightElbow, pose.rightHand, 'horizontal')}
-            </>
-          )}
-        </g>
-      );
-    case 'dumbbell-near': {
-      const targetHand = cfg.cableHand === 'left' ? pose.leftHand : pose.rightHand;
-      const targetElbow = cfg.cableHand === 'left' ? pose.leftElbow : pose.rightElbow;
-      return isNeutral
-        ? renderDumbbellEndOn(targetHand.x, targetHand.y)
-        : renderDumbbellBroadside(targetElbow, targetHand, 'horizontal');
-    }
+    case 'dumbbell-near':
+      return null; // Drawn together with the gripping hand at its own depth.
     case 'bar-wide': {
       const dx = pose.rightHand.x - pose.leftHand.x;
       const dy = pose.rightHand.y - pose.leftHand.y;
@@ -1705,24 +1702,8 @@ function renderFrontLoad(
         </g>
       );
     }
-    case 'rope': {
-      const apex = midPoint(pose.leftHand, pose.rightHand);
-      const topY = Math.min(pose.leftHand.y, pose.rightHand.y) - 14;
-      return (
-        <g>
-          <path
-            d={`M ${pose.leftHand.x} ${pose.leftHand.y + 5} Q ${pose.leftHand.x + 4} ${topY + 6} ${apex.x} ${topY} Q ${pose.rightHand.x - 4} ${topY + 6} ${pose.rightHand.x} ${pose.rightHand.y + 5}`}
-            fill="none"
-            stroke="#D6D3D1"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeDasharray="3.5 1.5"
-          />
-          <circle cx={pose.leftHand.x} cy={pose.leftHand.y + 6} r="3.6" fill="#1F2430" stroke="#94A3B8" strokeWidth="1.1" />
-          <circle cx={pose.rightHand.x} cy={pose.rightHand.y + 6} r="3.6" fill="#1F2430" stroke="#94A3B8" strokeWidth="1.1" />
-        </g>
-      );
-    }
+    case 'rope':
+      return null; // Ring and both branches are projected together.
     case 'cable-handle': {
       let targets: Point2D[] = [pose.leftHand, pose.rightHand];
       if (viewSpec.apparatus === 'cable-single') {
@@ -1780,10 +1761,22 @@ export function ExerciseExecutionScene({
   const activeSet = new Set<ActiveBodyRegion>(spec.activeHighlights);
   const isCalf = spec.side.apparatus === 'seated-calf' || spec.side.apparatus === 'standing-calf';
   const highlightOpacity = 0.52 + 0.43 * progress;
+  const { side: profile, front } = executionPose(spec, progress);
+  function drawHand(role: 'near' | 'far' | 'left' | 'right', elbow: Point2D, hand: Point2D) {
+    const inProfile = role === 'near' || role === 'far';
+    const viewSpec = inProfile ? spec.side : spec.front;
+    const grip = <HandGrip elbow={elbow} hand={hand} grip={viewSpec.grip} role={role} dimmed={role === 'far'} />;
+    const loaded = viewSpec.load === 'dumbbells' || (viewSpec.load === 'dumbbell-near' &&
+      (role === 'near' || role === (viewSpec.apparatusConfig?.cableHand ?? 'right')));
+    if (!loaded) return grip;
+    const limb = role === 'far' || role === 'left' ? 'far' : 'near';
+    const axis = dumbbellAxis(spec, activeView, profile[`${limb}Elbow`], profile[`${limb}Hand`]);
+    return <ProjectedDumbbell hand={hand} axis={axis} dimmed={role === 'far'}>{grip}</ProjectedDumbbell>;
+  }
 
   if (activeView === 'side') {
     const viewSpec = spec.side;
-    const pose = interpolateSidePose(viewSpec.start, viewSpec.mid, viewSpec.end, progress);
+    const pose = profile;
     const faceDir = pose.faceDir ?? 1;
     const upperArm = subSegment(pose.shoulder, pose.nearElbow, 0.15, 0.85);
 
@@ -1823,13 +1816,11 @@ export function ExerciseExecutionScene({
           {/* Membros distantes (profundidade) */}
           <Limb a={pose.hip} b={pose.farKnee} width={11} fill="#252836" stroke="#181A22" />
           <Limb a={pose.farKnee} b={pose.farFoot} width={8.5} fill="#252836" stroke="#181A22" />
-          {isCalf && <CalfFoot ankle={pose.farFoot} toeX={viewSpec.start.farFoot.x + 14} />}
+          {isCalf ? <CalfFoot ankle={pose.farFoot} toeX={viewSpec.start.farFoot.x + 14} /> :
+            <ProfileFoot ankle={pose.farFoot} knee={pose.farKnee} facing={faceDir} apparatus={viewSpec.apparatus} far />}
           <Limb a={pose.shoulder} b={pose.farElbow} width={8.5} fill="#252836" stroke="#181A22" />
           <Limb a={pose.farElbow} b={pose.farHand} width={7} fill="#252836" stroke="#181A22" />
-          {viewSpec.load === 'dumbbells' && (viewSpec.grip === 'neutral'
-            ? renderDumbbellBroadside(pose.farElbow, pose.farHand, 'perp-forearm', true)
-            : renderDumbbellEndOn(pose.farHand.x, pose.farHand.y, true))}
-          <HandGrip elbow={pose.farElbow} hand={pose.farHand} grip={viewSpec.grip} role="far" dimmed />
+          {drawHand('far', pose.farElbow, pose.farHand)}
 
           {/* Perna próxima */}
           <Limb
@@ -1850,7 +1841,7 @@ export function ExerciseExecutionScene({
             highlight={activeSet.has('calves')}
             highlightOpacity={highlightOpacity}
           />
-          {isCalf ? <CalfFoot ankle={pose.nearFoot} toeX={viewSpec.start.nearFoot.x + 14} /> : <circle cx={pose.nearFoot.x} cy={pose.nearFoot.y} r="4.5" fill="#4B526B" />}
+          {isCalf ? <CalfFoot ankle={pose.nearFoot} toeX={viewSpec.start.nearFoot.x + 14} /> : <ProfileFoot ankle={pose.nearFoot} knee={pose.nearKnee} facing={faceDir} apparatus={viewSpec.apparatus} />}
 
           {/* Tronco anatômico lateral */}
           <SideTorso
@@ -1907,13 +1898,17 @@ export function ExerciseExecutionScene({
           />
 
           {/* Carga + Mão/Pegada */}
+          {viewSpec.apparatus === 'peck-deck' && <PeckDeckArm hand={pose.nearHand} pivot={peckDeckPivot(viewSpec.apparatusConfig ?? {})} near />}
+          {viewSpec.load === 'rope' && <CableRope
+            anchor={{ x: viewSpec.apparatusConfig?.anchorX ?? 234, y: viewSpec.apparatusConfig?.anchorY ?? 28 }}
+            ring={ropeRing(spec, profile, front).side} hands={[pose.farHand, pose.nearHand]} />}
           {renderSideLoad(viewSpec.load, pose, viewSpec)}
-          <HandGrip elbow={pose.nearElbow} hand={pose.nearHand} grip={viewSpec.grip} role="near" />
+          {viewSpec.load === 'dumbbell-shared' && <SharedDumbbell hand={midPoint(pose.farHand, pose.nearHand)} profile={profile} view="side" />}
+          {drawHand('near', pose.nearElbow, pose.nearHand)}
 
           {(viewSpec.load === 'bar-wide' || viewSpec.apparatus === 'shoulder-press-machine' || spec.exerciseId === 'ex-remada-maquina-aberta') && (
             <circle cx={pose.nearHand.x + 1} cy={pose.nearHand.y} r="3" fill="#758398" stroke="#E1E8F0" strokeWidth="1.2" />
           )}
-          {viewSpec.load === 'dumbbells' && viewSpec.grip !== 'neutral' && renderDumbbellEndOn(pose.nearHand.x, pose.nearHand.y)}
 
           {/* Setas de movimento */}
           {viewSpec.motionArrows.map((d, idx) => (
@@ -1945,11 +1940,12 @@ export function ExerciseExecutionScene({
     );
   }
 
-  // Vista Frontal
+  const standingPlan = activeView === 'top' && spec.topReplacesSide;
   const viewSpec = spec.front;
-  const overhead = viewSpec.projection === 'top';
+  const overhead = activeView === 'top';
   const angleLabel = overhead ? 'superior' : 'frontal';
-  const pose = interpolateFrontPose(viewSpec.start, viewSpec.mid, viewSpec.end, progress);
+  const pose = standingPlan ? pallofPlan(profile, front) : front;
+  const annotations = standingPlan ? spec.side : viewSpec;
   const shoulderMid = midPoint(pose.leftShoulder, pose.rightShoulder);
   const hipMid = midPoint(pose.leftHip, pose.rightHip);
   const isLegPressFront = viewSpec.apparatus === 'leg-press-45';
@@ -1965,8 +1961,30 @@ export function ExerciseExecutionScene({
   const rest = viewSpec.start;
   const seated = !overhead && rest.head.y > 45 && rest.leftFoot.y >= 184 &&
     rest.leftKnee.y > rest.leftHip.y && rest.leftKnee.y - rest.leftHip.y < 28;
-  const frontLegs = (
-    <g>
+  const lowerLegs = (
+    <g data-part="shins">
+      <Limb
+        a={pose.leftKnee}
+        b={pose.leftFoot}
+        width={seated ? 10.5 : 9}
+        fill="#3B4054"
+        stroke="#78809A"
+        highlight={activeSet.has('calves')}
+        highlightOpacity={highlightOpacity}
+      />
+      <Limb
+        a={pose.rightKnee}
+        b={pose.rightFoot}
+        width={seated ? 10.5 : 9}
+        fill="#3B4054"
+        stroke="#78809A"
+        highlight={activeSet.has('calves')}
+        highlightOpacity={highlightOpacity}
+      />
+    </g>
+  );
+  const thighs = (
+    <g data-part="thighs">
       <Limb
         a={pose.leftHip}
         b={pose.leftKnee}
@@ -2009,31 +2027,20 @@ export function ExerciseExecutionScene({
           />
         </>
       )}
-      <Limb
-        a={pose.leftKnee}
-        b={pose.leftFoot}
-        width={seated ? 10.5 : 9}
-        fill="#3B4054"
-        stroke="#78809A"
-        highlight={activeSet.has('calves')}
-        highlightOpacity={highlightOpacity}
-      />
-      <Limb
-        a={pose.rightKnee}
-        b={pose.rightFoot}
-        width={seated ? 10.5 : 9}
-        fill="#3B4054"
-        stroke="#78809A"
-        highlight={activeSet.has('calves')}
-        highlightOpacity={highlightOpacity}
-      />
-      {isCalf && [pose.leftFoot, pose.rightFoot].map((ankle, i) => <CalfFoot key={i} ankle={ankle} toeX={ankle.x + (i ? 3 : -3)} front />)}
-      {!isLegPressFront && !isCalf && (
-        <>
-          <ellipse cx={pose.leftFoot.x} cy={pose.leftFoot.y} rx={seated ? 6 : 4.2} ry="4" fill="#4B526B" />
-          <ellipse cx={pose.rightFoot.x} cy={pose.rightFoot.y} rx={seated ? 6 : 4.2} ry="4" fill="#4B526B" />
-        </>
-      )}
+    </g>
+  );
+  const splitSquat = viewSpec.apparatus === 'bulgarian-bench';
+  const legMachine = ['seated-leg-curl', 'leg-extension'].includes(viewSpec.apparatus);
+  const frontFeet = (['left', 'right'] as const).map((side) => {
+    const ankle = pose[`${side}Foot`];
+    if (isCalf) return <CalfFoot key={side} ankle={ankle} toeX={ankle.x + (side === 'left' ? -3 : 3)} front />;
+    const sole = legMachine && ankle.y - pose[`${side}Knee`].y < 22;
+    return <FrontFoot key={side} ankle={ankle} sole={sole} />;
+  });
+  const frontLegs = (
+    <g>
+      {splitSquat ? <>{lowerLegs}{frontFeet}{thighs}</> : <>{thighs}{lowerLegs}{!isLegPressFront && !legMachine && frontFeet}</>}
+
     </g>
   );
 
@@ -2048,7 +2055,7 @@ export function ExerciseExecutionScene({
         </div>
       )}
       <svg
-        viewBox="0 0 320 220"
+        viewBox={standingPlan ? '8 23 254 174' : '0 0 320 220'}
         className={`w-full ${compact ? 'h-40' : 'h-52 sm:h-56'} block select-none`}
         role="img"
         aria-label={label ? `${label} (vista ${angleLabel})` : `Vista ${angleLabel} da execução`}
@@ -2067,6 +2074,7 @@ export function ExerciseExecutionScene({
           </marker>
         </defs>
 
+        {standingPlan ? <PallofOverhead pose={pose} cfg={spec.side.apparatusConfig ?? {}} /> : <>
         {overhead ? (
           <rect x={viewSpec.apparatus === 'mat' ? 110 : 145} y="16"
             width={viewSpec.apparatus === 'mat' ? 100 : 30} height={viewSpec.apparatus === 'mat' ? 200 : 138}
@@ -2081,8 +2089,16 @@ export function ExerciseExecutionScene({
         {/* Pernas (atrás do tronco por padrão; na frente do tronco no Leg Press 45°) */}
         {!isLegPressFront && frontLegs}
 
+        {viewSpec.load === 'dumbbell-shared' && <>
+          <SharedDumbbell hand={midPoint(pose.leftHand, pose.rightHand)} profile={profile} view="front" />
+          {drawHand('left', pose.leftElbow, pose.leftHand)}
+          {drawHand('right', pose.rightElbow, pose.rightHand)}
+        </>}
         {/* Tronco frontal anatômico (pelve alinhada em y≈52 para preservar proporção das pernas) */}
-        <g transform={torsoTransform}>
+        {viewSpec.endOn ? (
+          <ellipse cx={shoulderMid.x} cy={(shoulderMid.y + hipMid.y) / 2} rx="21"
+            ry={9 + Math.abs(hipMid.y - shoulderMid.y) / 2} fill="#4C586E" stroke="#8D99AA" strokeWidth="1.2" />
+        ) : <g transform={torsoTransform}>
           <path
             d="M-20 0 Q-12 -1.5 -5.5 -4.5 Q0 -2 5.5 -4.5 Q12 -1.5 20 0
                Q21.5 9 15.5 23 Q12 31.5 13 40 L14.5 47.5
@@ -2136,7 +2152,7 @@ export function ExerciseExecutionScene({
             d="M-13.2 40 Q0 44 13.2 40 L14.5 47.5 Q7 52.2 0 52.2 Q-7 52.2 -14.5 47.5Z"
             fill="#333D51"
           />
-        </g>
+        </g>}
         {activeSet.has('glutes') && (
           <>
             <circle cx={pose.leftHip.x - 2} cy={pose.leftHip.y} r="7" fill={ACTIVE_FILL} fillOpacity={highlightOpacity} />
@@ -2144,9 +2160,17 @@ export function ExerciseExecutionScene({
           </>
         )}
 
+        {viewSpec.apparatus === 'seated-leg-curl' && (
+          <rect data-part="thigh-pad" x="128" y={pose.leftKnee.y - 9} width="64" height="7" rx="3" fill="#526078" stroke="#8491A5" />
+        )}
+        {viewSpec.apparatus === 'leg-extension' && (
+          <rect x={pose.leftFoot.x - 14} y={pose.leftFoot.y - 10} width={pose.rightFoot.x - pose.leftFoot.x + 28}
+            height="8" rx="4" fill="#526078" stroke="#8390A3" />
+        )}
+        {legMachine && frontFeet}
         {/* Pescoço e Cabeça */}
         <Limb a={shoulderMid} b={pose.neck} width={7.4} fill="#373C4F" stroke="#78809A" />
-        <Head head={pose.head} neck={pose.neck} />
+        <Head head={pose.head} neck={pose.neck} endOn={viewSpec.endOn} />
 
         {(viewSpec.apparatus === 'chest-supported-row' || spec.exerciseId === 'ex-voador-invertido') && (
           <rect x={shoulderMid.x - 12} y={shoulderMid.y + 6} width="24" height="36" rx="5" fill="#293343" stroke="#657186" />
@@ -2211,68 +2235,33 @@ export function ExerciseExecutionScene({
               stroke="#94A3B8"
               strokeWidth="1.4"
             />
-            <rect
-              x={pose.leftFoot.x - 7}
-              y={pose.leftFoot.y - 4.5}
-              width="14"
-              height="9"
-              rx="3"
-              fill="#64748B"
-              stroke="#CBD5E1"
-              strokeWidth="1"
-            />
-            <rect
-              x={pose.rightFoot.x - 7}
-              y={pose.rightFoot.y - 4.5}
-              width="14"
-              height="9"
-              rx="3"
-              fill="#64748B"
-              stroke="#CBD5E1"
-              strokeWidth="1"
-            />
+            <FrontFoot ankle={pose.leftFoot} sole />
+            <FrontFoot ankle={pose.rightFoot} sole />
           </g>
         )}
 
         {/* Cabo da polia em primeiro plano para corda frontal (ex.: tríceps polia / face pull) */}
-        {showForegroundRopeCable && (
-          <g>
-            <line
-              x1={cfg.anchorX ?? 160}
-              y1={cfg.anchorY ?? 24}
-              x2={(pose.leftHand.x + pose.rightHand.x) / 2}
-              y2={Math.min(pose.leftHand.y, pose.rightHand.y) - 14}
-              stroke="#94A3B8"
-              strokeWidth="1.9"
-            />
-            <circle
-              cx={(pose.leftHand.x + pose.rightHand.x) / 2}
-              cy={Math.min(pose.leftHand.y, pose.rightHand.y) - 14}
-              r="2.6"
-              fill="#CBD5E1"
-              stroke="#18181B"
-              strokeWidth="0.9"
-            />
-          </g>
+        {spec.exerciseId === 'ex-pallof-press' && (
+          <line x1={cfg.anchorX} y1={cfg.anchorY} x2={midPoint(pose.leftHand, pose.rightHand).x}
+            y2={pose.leftHand.y} stroke="#A6B3C8" strokeWidth="1.8" />
         )}
+        {showForegroundRopeCable && <CableRope anchor={{ x: cfg.anchorX ?? 160, y: cfg.anchorY ?? 24 }}
+          ring={ropeRing(spec, profile, front).front} hands={[pose.leftHand, pose.rightHand]} />}
 
         {/* Carga + Mãos/Pegada */}
         {spec.exerciseId === 'ex-remada-maquina-aberta' && [pose.leftHand, pose.rightHand].map((hand, i) => (
           <line key={i} x1={hand.x - 9} x2={hand.x + 9} y1={hand.y} y2={hand.y} stroke="#BDC9D9" strokeWidth="4" strokeLinecap="round" />
         ))}
         {renderFrontLoad(viewSpec.load, pose, viewSpec, spec.exerciseId)}
-        <HandGrip elbow={pose.leftElbow} hand={pose.leftHand} grip={viewSpec.grip} role="left" />
-        <HandGrip elbow={pose.rightElbow} hand={pose.rightHand} grip={viewSpec.grip} role="right" />
 
-        {viewSpec.projection !== 'top' && viewSpec.grip === 'neutral' && viewSpec.load === 'dumbbells' && (
-          <>
-            {renderDumbbellEndOn(pose.leftHand.x, pose.leftHand.y)}
-            {renderDumbbellEndOn(pose.rightHand.x, pose.rightHand.y)}
-          </>
-        )}
+        {viewSpec.load === 'dumbbell-shared' ? <Head head={pose.head} neck={pose.neck} /> : <>
+          {drawHand('left', pose.leftElbow, pose.leftHand)}
+          {drawHand('right', pose.rightElbow, pose.rightHand)}
+        </>}
+        </>}
 
         {/* Setas de movimento */}
-        {viewSpec.motionArrows.map((d, idx) => (
+        {annotations.motionArrows.map((d, idx) => (
           <path
             key={idx}
             d={d}
@@ -2286,7 +2275,7 @@ export function ExerciseExecutionScene({
         ))}
       </svg>
 
-      {viewSpec.gripNote && (
+      {annotations.gripNote && (
         <div className="px-2.5 py-1.5 bg-[#14141A] border-t border-[#22222C] flex items-center gap-2 text-[0.7rem] text-[#C4C9D4]">
           <svg viewBox="-8 -8 16 16" width="28" height="28" aria-hidden="true" className="shrink-0">
               <HandGrip elbow={{ x: 0, y: 8 }} hand={{ x: 0, y: 0 }} role="left" grip={viewSpec.grip} />
@@ -2294,7 +2283,7 @@ export function ExerciseExecutionScene({
             <span className="px-1.5 py-0.5 rounded bg-[#1E2230] border border-[#2E3448] text-[0.62rem] font-semibold uppercase tracking-wide text-[#E2E8F0] shrink-0">
             {GRIP_LABELS[viewSpec.grip]}
           </span>
-          <span className="leading-snug">{viewSpec.gripNote}</span>
+          <span className="leading-snug">{annotations.gripNote}</span>
         </div>
       )}
     </div>
@@ -2399,30 +2388,15 @@ export function ExerciseExecutionPlayer({
           <span className="pl-2 pr-1 text-[#6B7280]" aria-hidden="true">
             <Eye className="w-3.5 h-3.5" />
           </span>
-          <button
-            type="button"
-            aria-pressed={activeView === 'side'}
-            onClick={() => setActiveView('side')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
-              activeView === 'side'
-                ? 'bg-[#25252C] text-[#F4F4F6]'
-                : 'text-[#9CA3AF] hover:text-[#F4F4F6]'
-            }`}
-          >
-            Vista Lateral
-          </button>
-          <button
-            type="button"
-            aria-pressed={activeView === 'front'}
-            onClick={() => setActiveView('front')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
-              activeView === 'front'
-                ? 'bg-[#25252C] text-[#F4F4F6]'
-                : 'text-[#9CA3AF] hover:text-[#F4F4F6]'
-            }`}
-          >
-            {spec.front.projection === 'top' ? 'Vista Superior' : 'Vista Frontal'}
-          </button>
+          {exerciseViews(spec).map((view) => (
+            <button key={view} type="button" aria-pressed={activeView === view}
+              onClick={() => setActiveView(view)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                activeView === view ? 'bg-[#25252C] text-[#F4F4F6]' : 'text-[#9CA3AF] hover:text-[#F4F4F6]'
+              }`}>
+              {{ side: 'Vista Lateral', front: 'Vista Frontal', top: 'Vista Superior' }[view]}
+            </button>
+          ))}
         </div>
       </div>
 

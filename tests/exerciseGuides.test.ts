@@ -11,6 +11,7 @@ import {
 import { EXERCISE_GUIDES, getExerciseGuide } from '../src/data/exerciseGuides';
 import {
   EXERCISE_ANIMATIONS,
+  exerciseViews,
   interpolateFrontPose,
   interpolateSidePose,
   type FrontPose,
@@ -124,7 +125,7 @@ function assertSegmentStability(
 }
 
 describe('Guias visuais de músculos e execução de exercícios (100% offline)', () => {
-  it('cobre 100% dos exercícios do catálogo inicial com guias e vistas ortogonais (side + front) válidas', () => {
+  it('cobre o catálogo inicial com guias e duas câmeras válidas por exercício', () => {
     expect(INITIAL_EXERCISES.length).toBeGreaterThanOrEqual(41);
     expect(EXERCISE_GUIDES['ex-remada-convergente-unilateral']).toBeDefined();
     expect(EXERCISE_GUIDES['ex-triceps-testa-halter']).toBeDefined();
@@ -162,7 +163,7 @@ describe('Guias visuais de músculos e execução de exercícios (100% offline)'
       const anim = EXERCISE_ANIMATIONS[ex.id];
       expect(anim, `Animação ausente para ${ex.id}`).toBeDefined();
       expect(anim.exerciseId, `${ex.id} exerciseId consistente`).toBe(ex.id);
-      expect(['side', 'front'], `${ex.id} defaultView válido`).toContain(anim.defaultView);
+      expect(exerciseViews(anim), `${ex.id} defaultView válido`).toContain(anim.defaultView);
       expect(anim.activeHighlights.length, `${ex.id} precisa de activeHighlights`).toBeGreaterThan(0);
 
       // Vista lateral obrigatória

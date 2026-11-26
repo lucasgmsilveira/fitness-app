@@ -64,6 +64,7 @@ export type ApparatusPreset =
 export type LoadStyle =
   | 'none'
   | 'dumbbells'
+  | 'dumbbell-shared'
   | 'dumbbell-near'
   | 'bar-wide'
   | 'v-bar'
@@ -103,7 +104,7 @@ export interface ApparatusConfig {
   cableHand?: 'left' | 'right' | 'both' | 'near' | 'far';
 }
 
-export type AnimationView = 'side' | 'front';
+export type AnimationView = 'side' | 'front' | 'top';
 
 export type GripType = 'pronated' | 'supinated' | 'neutral' | 'open' | 'mixed';
 
@@ -121,6 +122,7 @@ export interface SideViewSpec {
 
 export interface FrontViewSpec {
   projection?: 'top';
+  endOn?: 'prone' | 'supine';
   apparatus: ApparatusPreset;
   apparatusConfig?: ApparatusConfig;
   load: LoadStyle;
@@ -135,10 +137,16 @@ export interface FrontViewSpec {
 export interface ExerciseAnimationSpec {
   exerciseId: string;
   defaultView: AnimationView;
+  topReplacesSide?: boolean;
   isometric?: boolean;
   activeHighlights: ActiveBodyRegion[];
   side: SideViewSpec;
   front: FrontViewSpec;
+}
+
+export function exerciseViews(spec: ExerciseAnimationSpec): readonly [AnimationView, AnimationView] {
+  if (spec.topReplacesSide) return ['top', 'front'];
+  return ['side', spec.front.projection === 'top' ? 'top' : 'front'];
 }
 
 function lerp(a: number, b: number, t: number): number {
